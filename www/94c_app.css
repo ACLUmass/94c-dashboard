@@ -1,0 +1,309 @@
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Custom CSS for SJC 12926 COVID-19 Tracker Shiny App
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Thank you: https://shiny.rstudio.com/articles/css.html
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+
+/* Define GT America font */
+/* CSS modified from aclum.org: https://www.aclum.org/sites/default/files/css/css_EjcJzxzhvjcsFc2zO64tGCpzBzxgdDr78RRvkT__FRA.css */
+
+/* GT America Condensed Regular */
+@font-face {
+  font-family:'gtamcond';
+  src: url("fonts/gtamerica/GT-America-Condensed-Regular.woff2") format('woff2');
+  font-weight:400;
+}
+
+/* GT America Condensed Bold */
+@font-face {
+  font-family:'gtamcond';
+  src: url("fonts/gtamerica/GT-America-Condensed-Bold.woff2") format('woff2');
+  font-weight:600;
+}
+
+/* GT America Regular */
+@font-face {
+  font-family:'gtam';
+  src: url("fonts/gtamerica/GT-America-Standard-Regular.woff2") format('woff2');
+  font-weight:400;
+}
+
+/* GT America Bold */
+@font-face {
+  font-family:'gtam';
+  src: url("fonts/gtamerica/GT-America-Standard-Bold.woff2") format('woff2');
+  font-weight:600;
+}
+
+
+body {
+  font-family: 'gtam', sans-serif;
+  margin-right: 5%;
+}
+
+#title {
+  background-color: #00343a;
+  color: white;
+  width: 120%;
+  margin-left: -8%;
+  margin-right: -8%;
+  padding-bottom: 10px;
+  height: 75px;
+  border-bottom: #ffdf69 solid 6px;
+}
+
+#title h2 {
+  display:inline;
+  position: absolute;
+  margin-left: 10%;
+}
+
+label {
+  white-space: normal;
+}
+
+#internal_well .row {
+    margin-left: inherit;
+    margin-right: inherit;
+}
+
+#internal_well .col-sm-6,
+#internal_well .col-sm-4 {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.tabbable {
+  max-width: 750px;
+}
+
+/* Fix dropdown cutoff issue */
+.shiny-split-layout > div {
+  overflow: visible;
+}
+
+/* Update bar to match ACLUM website */
+.well.col-sm-3 {
+  background-color: #00343a;
+  border-radius: 0;
+  border: none;
+  margin-left: calc(-5% + 15px);
+  padding-left: 5%;
+  margin-bottom: 0px;
+}
+
+.col-sm-9 {
+  padding-top: 2rem;
+}
+
+.nav-pills>li.active>a, 
+.nav-pills>li.active>a:focus, 
+.nav-pills>li.active>a:hover {
+  background-color: #a7d7b5;
+  color: #00343a;
+}
+
+.nav-pills>li>a {
+  color: white;
+  border-radius: 0px;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-family: gtamcond;
+}
+
+.nav>li>a:focus, 
+.nav>li>a:hover {
+  text-decoration: none;
+  background-color: #ffdf69;
+  color: #00343a;
+}
+
+h1, h2, h3, h4 {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-family: gtamcond;
+}
+
+h4 {
+  opacity: .5;
+  display: inline;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+/* a[data-value="Download the Data"]
+{
+  border-bottom: 1px solid #eee;
+}*/
+
+/* "Please be patient" message*/
+#dev-wait p {
+  display: inline;
+}
+
+#dev-wait h4 {
+  display: inline;
+  margin-left: 1rem;
+  opacity: 1;
+}
+
+#dev-wait em{
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+}
+
+#dev-wait .well {
+  border-radius: 0px;
+  border: none;
+  margin-top: 2rem;
+}
+
+#dev-wait i {
+  color: darkgray;
+  font-size: 1.5rem;
+}
+
+#time_type {
+  text-align: center;
+}
+
+#internal_well {
+  border-radius: 0px;
+}
+
+#internal_well .form-group {
+  margin-bottom: -5px;
+}
+
+#custom_label_div .form-group {
+    margin-top: 5px;
+}
+
+#internal_well .shiny-input-radiogroup {
+  margin-bottom: 2rem;
+  margin-top: 20px;
+}
+
+#internal_well #radio_prompt {
+  margin-bottom: 0px;
+}
+
+.form-control,
+.selectize-input {
+  border-radius: 0px;
+}
+
+#internal_well .action-button {
+  display: block;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 100px;
+  border-radius: 0px;
+  border-color: #ef404d;
+  background-color: #ef404d;
+  color: white;
+  font-weight: 600;
+}
+
+#internal_well .action-button:focus {
+  outline: none 2px #000;
+}
+
+#internal_well p {
+  font-weight: bold
+}
+
+#internal_well ul {
+  font-style: italic;
+  margin-bottom: 0px;
+}
+
+#internal_well em {
+  margin-bottom: 1rem;
+  display: block;
+}
+
+div[data-value="Compare stops over time"] label span {
+  font-style: italic;
+}
+
+#download_div {
+  text-align: center;
+}
+
+#download_div .shiny-spinner-placeholder {
+  height: 100px !important;
+}
+
+.shiny-table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.shiny-html-output {
+  text-align: center;
+}
+
+#log-tooltip p {
+    font-weight: 400;
+}
+
+#log-tooltip {
+  font-family: gtam;
+}
+
+.tooltip-inner {
+    max-width: 300px;
+    color: #444;
+    background-color: white;
+    border: 1.5px solid #444;
+}
+
+.tooltip.bottom .tooltip-arrow  {
+  border-color: #444;
+}
+
+/*
+#town_log_span{
+  margin-top: 20px;
+}
+
+#town_log_span b {
+  margin-bottom: 5px;
+}
+
+#town_log_span .form-group,
+#town_log_span .checkbox {
+  display: inline;
+}
+
+#town_race_legend,  #officer_race_legend {
+  margin-left: auto;
+  margin-right: auto;
+  max-height: 80px;
+  max-width: 100%;
+  display: block;
+}
+*/
+
+#footer {
+  padding-top: 20px;
+  background-color: #eaecee;
+  margin-left: -5%;
+  margin-right: -10%;
+  padding-bottom: 10px;
+}
+
+.nav-pills .navbar-brand {
+  color: #ffdf69;
+  padding-left: 5px;
+  text-transform: uppercase;
+  font-family: gtamcond;
+  font-weight: bold;
+}
+
+.selectize-control, th, td {
+  white-space: normal;
+}
