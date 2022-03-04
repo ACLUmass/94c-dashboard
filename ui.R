@@ -8,11 +8,16 @@ library(plotly)
 library(data.table)
 
 combined94c_data <- fread("94c_combined.csv")
+charge_cats <- read_csv("data/94c_charge_codes.csv")
+disp_cats <- read_csv("data/94c_dispositions.csv")
 
 all_towns <- combined94c_data[order(jurisdiction), jurisdiction] %>%
   unique()
 all_depts <- combined94c_data[order(department), department] %>%
   unique()
+all_courts <- combined94c_data[order(court), court] %>%
+  unique()
+all_charges <- charge_cats$charge_cat
 
 # all_agencies <- readRDS("data/all_agencies.RDS")
 # all_towns <- readRDS("data/all_towns.rds")
@@ -108,7 +113,7 @@ fluidPage(
                            #          
                                     br(),br(),
                                     h4("What's included?"),
-                                    "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset includes information regarding the criminal statute under Chapter 94C applicable to each charge; the year of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
+                                    "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset includes information regarding the criminal statute under Chapter 94C applicable to each charge; the years of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
                                     
                                     br(),br(),
                                     h4("What's not included?"),
@@ -122,7 +127,7 @@ fluidPage(
                                         target="_blank",
                                         "Sonja Farak"), "and",
                                     a(href="https://www.npr.org/sections/thetwo-way/2017/04/20/524894955/massachusetts-throws-out-more-than-21-000-convictions-in-drug-testing-scandal", "Annie Dookhan;", target="_blank"),
-                                    "this dataset documents the intricacies of drug prosecution across Massachusetts for over a decade. Indeed, the timeframe captured by the data includes Massachusetts'",
+                                    "this dataset documents the intricacies of drug prosecution across Massachusetts for over a decade. Notably, the timeframe captured by the data includes Massachusetts'",
                                     a("decriminalization", href="https://archive.boston.com/news/local/articles/2008/11/05/voters_approve_marijuana_law_change/", target="_blank"),
                                     "of marijuana in 2008, enabling direct analysis of how drug prosecution changed in response to sweeping policy change.",
 
@@ -135,7 +140,8 @@ fluidPage(
                                     
                                     h3("Source Code"),
                                     p("Interested programmers can view the source code for this app, written in R, on",
-                                      a("GitHub (BROKEN).", href="#"))
+                                      a("GitHub (BROKEN).", href="#")),
+                           br(),br()
                            ),
                            
                            # Download data --------------------------------------------
@@ -205,11 +211,15 @@ fluidPage(
                            # Disposition ------------------------------------------
                            tabPanel("Disposition", 
                                     wellPanel(id="internal_well",
-                                              em("Select criteria:"),
+                                              em("Explore the dispositions (sentences) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
                                       fluidRow(
-                                        column(6, splitLayout(
+                                        splitLayout(
                                           selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns)),
-                                          selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts)))
+                                          selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts))
+                                        ),
+                                        splitLayout(
+                                          selectizeInput("disp_court", "Court", c("All courts", all_courts)),
+                                          selectizeInput("disp_charge", label="Charge", c("All charges", all_charges))
                                         ),
 
                                         # column(6, splitLayout(
@@ -220,35 +230,18 @@ fluidPage(
                                         #     selectizeInput("time_officer",
                                         #                    label=NULL,
                                         #                    c("Loading, please wait..." = ""))),
-                                        # 
-                                        # selectizeInput("time_outcome",
-                                        #                label="Outcome", choices= all_outcomes)))),
                                       splitLayout(
+                                          selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
                                           numericInput("disp_start_year", "Start Year",
                                                     value = "2000", min="2000", max="2018"),
                                           numericInput("disp_end_year", "End Year",
-                                                       value = "2000", min="2000", max="2018")),
-                                      # checkboxInput("compare_time", label="Select a second town, agency, or officer to compare?", value=F),
-                                      # conditionalPanel(
-                                      #   condition = "input.compare_time == true",
-                                      #   fluidRow(
-                                      #     column(6, splitLayout(selectizeInput("time_town2", "Town/City", c("All cities and towns", all_towns)),
-                                      #     selectizeInput("time_agency2",
-                                      #                    label="Agency / Department", c("All agencies", all_agencies)))),
-                                      # 
-                                      #     column(6, splitLayout(div(id="custom_label_div",
-                                      #         tags$b("Officer ID"),
-                                      #         a(icon("info-circle"), id="officer_tooltip",
-                                      #           `data-toggle`="tooltip", title=officer_tooltip_html),
-                                      #         selectizeInput("time_officer2",
-                                      #                        label=NULL,
-                                      #                        c("Loading, please wait..." = ""))),
-                                      # 
-                                      #     selectizeInput("time_outcome2",
-                                      #                    label="Outcome", choices= all_outcomes))))),
-                                    actionButton("disp_button", "Go")),
+                                                       value = "2014", min="2000", max="2018")),
+                                    actionButton("disp_button", "Go"))
+                                    ),
+                                    h2(textOutput("disp_count_str"), align="center"),
+                                    p(textOutput("disp_str", inline=T), align="center"),
                                     withSpinner(plotlyOutput("disposition"), type=4, color="#b5b5b5", size=0.5)
-                                    ))#,
+                                    )#,
                            
                            # Stops by offense ------------------------------------------
                            # tabPanel("Stops by offense"#, 

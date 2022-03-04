@@ -13,7 +13,12 @@ library(scales)
 # library(pool)
 
 # Load data with fread
-combined94c_data <- fread("94c_combined.csv")
+charge_cats <- read_csv("data/94c_charge_codes.csv")
+disp_cats <- read_csv("data/94c_dispositions.csv")
+
+combined94c_data <- fread("94c_combined.csv") %>%
+  merge(charge_cats, by="charge") %>%
+  merge(disp_cats, by="disposition")
 
 # # Connect to sql database using pool to manage connections
 # sqldb <- dbPool(
@@ -365,24 +370,99 @@ function(input, output, session) {
     # 
     #     return(name)
     # }
+    
+    observe({
+      print("year has changed")
+      
+      if (input$disp_yr_type == "Arrest") {
+        yr_max <- combined94c_data %>% pull(arrest_year) %>% max(na.rm = TRUE)
+        yr_min <- combined94c_data %>% pull(arrest_year) %>% min(na.rm = TRUE)
+      } else if (input$disp_yr_type == "Disposition") {
+        yr_max <- combined94c_data %>% pull(disposition_year) %>% max(na.rm = TRUE)
+        yr_min <- combined94c_data %>% pull(disposition_year) %>% min(na.rm = TRUE)
+      } else if (input$disp_yr_type == "Filing") {
+        yr_max <- combined94c_data %>% pull(file_year) %>% max(na.rm = TRUE)
+        yr_min <- combined94c_data %>% pull(file_year) %>% min(na.rm = TRUE)
+      } else if (input$disp_yr_type == "Offense") {
+        yr_max <- combined94c_data %>% pull(offense_year) %>% max(na.rm = TRUE)
+        yr_min <- combined94c_data %>% pull(offense_year) %>% min(na.rm = TRUE)
+      }
+      
+      start_value <- input$disp_start_year
+      if (input$disp_start_year < yr_min) {
+        start_value <- yr_min
+      }
+      
+      end_value <- input$disp_end_year
+      if (input$disp_end_year > yr_max) {
+        end_value <- yr_max
+      }
+      
+      updateNumericInput(session,
+                         "disp_start_year", value=start_value,
+                         max=yr_max, min=yr_min)
+      updateNumericInput(session,
+                         "disp_end_year", value=end_value,
+                         max=yr_max, min=yr_min)
+      
+    })
+    
 
     observeEvent(input$disp_button, {
-      cat("CLICKED\n")
-      
+
         disp_values$town <- input$disp_city
         disp_values$agency <- input$disp_dept
+        disp_values$court <- input$disp_court
+        disp_values$charge <- input$disp_charge
+        disp_values$disp_yr_type <- input$disp_yr_type
+        disp_values$start_yr <- input$disp_start_year
+        disp_values$end_yr <- input$disp_end_year
         disp_values$data <- combined94c_data
+        
+        town_str <- "in Massachusetts"
+        dept_str <- ""
+        court_str <- ""
+        charge_str <- ""
         
         if(disp_values$town != "All cities and towns") {
           disp_values$data <- disp_values$data[jurisdiction == disp_values$town]
+          town_str <- paste("in", disp_values$town)
         }
         
         if(disp_values$agency != "All departments") {
           disp_values$data <- disp_values$data[department == disp_values$agency]
+          dept_str <- paste("by the", disp_values$agency, "Police Department")
+        }
+        
+        if(disp_values$court != "All courts") {
+          disp_values$data <- disp_values$data[court == disp_values$court]
+          court_str <- paste("and heard by the", disp_values$court)
+        }
+        
+        if(disp_values$charge != "All charges") {
+          disp_values$data <- disp_values$data[charge_cat == disp_values$charge]
+          charge_str <- disp_values$charge
         }
 
-        disp_values$data <- disp_values$data[offense_year >= input$disp_start_year & 
-                                               offense_year <= input$disp_end_year, .N, disposition]
+        if (disp_values$disp_yr_type == "Offense") {
+          disp_values$data <- disp_values$data[offense_year >= input$disp_start_year & 
+                                                 offense_year <= input$disp_end_year, .N, disposition_cat]
+          verb <- "allegedly committed"
+        } else if (disp_values$disp_yr_type == "Filing") {
+          disp_values$data <- disp_values$data[file_year >= input$disp_start_year & 
+                                                 file_year <= input$disp_end_year, .N, disposition_cat]
+          verb <- "filed"
+        } else if (disp_values$disp_yr_type == "Arrest") {
+          disp_values$data <- disp_values$data[arrest_year >= input$disp_start_year & 
+                                                 arrest_year <= input$disp_end_year, .N, disposition_cat]
+          verb <- "resulting in arrest"
+        } else if (disp_values$disp_yr_type == "Disposition") {
+          disp_values$data <- disp_values$data[disposition_year >= input$disp_start_year & 
+                                                 disposition_year <= input$disp_end_year, .N, disposition_cat]
+          verb <- "disposed"
+        }
+        
+        output$disp_str <- renderText(paste("drug-related", tolower(charge_str), "charges", verb, "between", disp_values$start_yr, "and", disp_values$end_yr, town_str,  dept_str, court_str))
 
         # if (time_values$town == "All cities and towns" &
         #     time_values$agency == "All agencies") {
@@ -445,12 +525,16 @@ function(input, output, session) {
     })
 
     output$disposition <- renderPlotly({
+      
 
         validate(
             need(disp_values$data, 'Please select filters and press "Go."')
         )
 
         data <- disp_values$data
+        
+        output$disp_count_str <- renderText(data %>% pull(N) %>%sum() %>% scales::comma())
+        
         
         View(data)
         cat(nrow(data))
@@ -483,7 +567,7 @@ function(input, output, session) {
           plot_ly(sort=F,
                   direction = "clockwise",
                   marker = list(line = list(color = 'lightgrey', width = 1)),
-                  labels = ~disposition, values = ~N,
+                  labels = ~disposition_cat, values = ~N,
                   textposition = "inside"
                   ) %>%
             add_pie() %>%
@@ -500,7 +584,7 @@ function(input, output, session) {
               #         hovertemplate = '<i>Race</i>: %{label}<br><i>Population (2018 estimate)</i>: %{value} (%{percent})<extra></extra>') %>%
               layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                     showlegend = FALSE,
+                     showlegend = TRUE,
                      font=list(family = "GT America"),
                      hoverlabel=list(font = list(family = "GT America")))
 
@@ -555,7 +639,7 @@ function(input, output, session) {
         #     }
         } else {
             # If there are no stops for the filter
-            empty_plotly("stops")
+            empty_plotly("charges")
         }
 
     })
