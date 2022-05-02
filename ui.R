@@ -6,6 +6,7 @@ library(showtext)
 library(plotly)
 # library(shinyjs)
 library(data.table)
+library(readr)
 
 combined94c_data <- fread("94c_combined.csv")
 charge_cats <- read_csv("data/94c_charge_codes.csv")
@@ -18,6 +19,19 @@ all_depts <- combined94c_data[order(department), department] %>%
 all_courts <- combined94c_data[order(court), court] %>%
   unique()
 all_charges <- charge_cats$charge_cat
+
+# Rename courts to be more accessible
+court_names <- data.frame(all_courts) %>%
+  rename(court = all_courts) %>%
+  mutate(court = as.character(court),
+         court_name= case_when(
+    str_detect(court, "BMC") ~ paste0("Boston Municipal Court (", str_remove(court, "BMC "), ")"),
+    str_detect(court, 'Court$', negate=T) ~ paste(str_remove(court, " Criminal"), "Superior Court"), # I did check this was true
+    T ~ court
+  )) %>%
+  pull(court_name)
+
+names(all_courts) <- court_names
 
 # all_agencies <- readRDS("data/all_agencies.RDS")
 # all_towns <- readRDS("data/all_towns.rds")
@@ -103,7 +117,7 @@ fluidPage(
                            h3("About the Data"),
                            
                            h4("Where did the data come from?"),
-                           "The data available here are the result of a 2017 lawsuit in response to the misconduct of state drug-lab chemist Sonja Farak and subsequent mishandling by the Massachusetts Attorney General's Office:",
+                           "The data available here are the result of a 2017 lawsuit, brought in response to the misconduct of state drug-lab chemist Sonja Farak and subsequent mishandling by the Massachusetts Attorney General's Office:",
                             a(href="https://www.aclum.org/en/cases/committee-public-counsel-services-v-attorney-general",
                               em("Committee for Public Counsel Services (CPCS) v. Attorney General.")),
                            
@@ -208,17 +222,18 @@ fluidPage(
                                     # 
                            # ),
                            
+                           
                            # Disposition ------------------------------------------
                            tabPanel("Disposition", 
                                     wellPanel(id="internal_well",
-                                              em("Explore the dispositions (sentences) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
+                                              em("Explore the dispositions (outcomes) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
                                       fluidRow(
                                         splitLayout(
                                           selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns)),
                                           selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts))
                                         ),
                                         splitLayout(
-                                          selectizeInput("disp_court", "Court", c("All courts", all_courts)),
+                                          selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts)),
                                           selectizeInput("disp_charge", label="Charge", c("All charges", all_charges))
                                         ),
 

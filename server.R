@@ -13,12 +13,44 @@ library(scales)
 # library(pool)
 
 # Load data with fread
-charge_cats <- read_csv("data/94c_charge_codes.csv")
-disp_cats <- read_csv("data/94c_dispositions.csv")
+charge_cats_df <- read_csv("data/94c_charge_codes.csv")
+disp_cats_df <- read_csv("data/94c_dispositions.csv")
+disp_colors <- readRDS("data/disp_colors.RDS")
 
 combined94c_data <- fread("94c_combined.csv") %>%
-  merge(charge_cats, by="charge") %>%
-  merge(disp_cats, by="disposition")
+  merge(charge_cats_df, by="charge") %>%
+  merge(disp_cats_df, by="disposition")
+
+# Further condense disposition categories
+combined94c_data <- combined94c_data %>% 
+  mutate(disposition_cat = case_when(
+    disposition_cat %in% c("CWOF", "Dismissed (Lab Misconduct)", "Dismissed", "Guilty", "Not Guilty", "Nolle Prosequi", "Filed Without Sentence", "Delinquent (Juvenile)", "Not Delinquent (Juvenile)", "Not Listed") ~ disposition_cat,
+    T ~ "Other"
+  ),
+  disposition_cat = factor(disposition_cat, 
+                           levels=c("Dismissed", "Dismissed (Lab Misconduct)",
+                                    "Guilty", "Not Guilty", "CWOF", 
+                                    "Nolle Prosequi", "Filed Without Sentence", 
+                                    "Delinquent (Juvenile)", 
+                                    "Not Delinquent (Juvenile)", 
+                                    "Not Listed", "Other")))
+
+
+all_courts <- combined94c_data[order(court), court] %>%
+  unique()
+
+# Rename courts to be more accessible
+court_names <- data.frame(all_courts) %>%
+  rename(court = all_courts) %>%
+  mutate(court = as.character(court),
+         court_name= case_when(
+           str_detect(court, "BMC") ~ paste0("Boston Municipal Court (", str_remove(court, "BMC "), ")"),
+           str_detect(court, 'Court$', negate=T) ~ paste(str_remove(court, " Criminal"), "Superior Court"), # I did check this was true
+           T ~ court
+         )) %>%
+  pull(court_name)
+
+names(all_courts) <- court_names
 
 # # Connect to sql database using pool to manage connections
 # sqldb <- dbPool(
@@ -372,6 +404,11 @@ function(input, output, session) {
     # }
     
     observe({
+      validate(
+        need(is.numeric(input$disp_start_year), 'Please enter a valid year.'),
+        need(is.numeric(input$disp_end_year), 'Please enter a valid year.')
+        )
+      
       print("year has changed")
       
       if (input$disp_yr_type == "Arrest") {
@@ -436,7 +473,8 @@ function(input, output, session) {
         
         if(disp_values$court != "All courts") {
           disp_values$data <- disp_values$data[court == disp_values$court]
-          court_str <- paste("and heard by the", disp_values$court)
+          i_court_name = match(disp_values$court, all_courts)
+          court_str <- paste("and heard by the", names(all_courts)[i_court_name])
         }
         
         if(disp_values$charge != "All charges") {
@@ -531,42 +569,21 @@ function(input, output, session) {
             need(disp_values$data, 'Please select filters and press "Go."')
         )
 
-        data <- disp_values$data
+        data <- disp_values$data %>%
+          arrange(disposition_cat)
         
         output$disp_count_str <- renderText(data %>% pull(N) %>%sum() %>% scales::comma())
         
-        
-        View(data)
-        cat(nrow(data))
-        # data2 <- if (time_values$compare) time_values$data2 else NULL
-
-        # cat("data2?", !is.null(data2))
-
-        # if (input$time_type == "Year") {
-        #     link <- "in"
-        #     date_format <- "%Y"
-        #     data <- data[year < 2021, .N, .(x=year)]
-        #     data2 <- if (time_values$compare) data2[year < 2021, .N, .(x=year)] else NULL
-        # 
-        # } else if (input$time_type == "Month") {
-        #     link <- "in"
-        #     date_format <- "%b %Y"
-        #     data <- data[month < ymd("20210201"), .N, .(x=month)]
-        #     data2 <- if (time_values$compare) data2[month < ymd("20210201"), .N, .(x=month)] else NULL
-        # 
-        # } else if (input$time_type == "Day") {
-        #     link <- "on"
-        #     date_format <- "%b %d, %Y"
-        #     data <- data[, .N, .(x=date)]
-        #     data2 <- if (time_values$compare) data2[, .N, .(x=date)] else NULL
-        # }
+        disp_colors_here <- disp_colors[data$disposition_cat]
+        disp_colors_here
 
         if (nrow(data) > 0) {
           
           data %>%
           plot_ly(sort=F,
                   direction = "clockwise",
-                  marker = list(line = list(color = 'lightgrey', width = 1)),
+                  marker = list(line = list(color = 'lightgrey', width = 1),
+                                colors=disp_colors_here),
                   labels = ~disposition_cat, values = ~N,
                   textposition = "inside"
                   ) %>%
