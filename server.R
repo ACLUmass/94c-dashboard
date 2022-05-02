@@ -343,66 +343,10 @@ function(input, output, session) {
 #     })
 #     
     # Disposition -----------------------------------------------------------------
-
-    # observeEvent(input$time_agency2, {
-    #     if (!input$time_agency2 %in% c("All agencies", "--")) {
-    #         selected_officers <- officers_per_agency[agency == input$time_agency2,
-    #                                                  list(officer)]
-    # 
-    #         updateSelectizeInput(session, "time_officer2",
-    #                              choices = c("All officers", selected_officers), server=T)
-    #     } else {
-    #         updateSelectizeInput(session, "time_officer2",
-    #                              choices = c("Please select agency" = ""))
-    #     }
-    # })
-
-    disp_values <- reactiveValues(agency = NULL)
-
-    # get_unit <- function(type) {
-    #     case_when(
-    #         type == "All outcomes" ~ "Stops",
-    #         type == "Warn" ~ "Warnings",
-    #         type == "Arrest" ~ "Arrests",
-    #         type == "Crim" ~ "Criminal Citations",
-    #         type == "Civil" ~ "Civil Citations",
-    #         T ~ type
-    #     )
-    # }
-
-    # get_legend_name <- function(loc, agency, officer, type, pie_label=F) {
-    # 
-    #     unit <- get_unit(type)
-    # 
-    #     if (officer != "All officers" &
-    #         officer != "") {
-    #         if (loc == "All cities and towns") {
-    #             name <- paste(unit, "by Officer", officer, "of the", agency)
-    #         } else {
-    #             name <- paste(unit, "by Officer", officer, "of the", agency, "in", loc)
-    #         }
-    #     } else if (agency != "All agencies") {
-    #         if (loc != "All cities and towns") {
-    #             name <- paste(unit, "by the", agency, "in", loc)
-    #         } else {
-    #             name <- paste(unit, "by the", agency)
-    #         }
-    #     } else if (loc != "All cities and towns") {
-    #         name <- paste(unit, "in", loc)
-    #     } else {
-    #         name <- unit
-    #     }
-    # 
-    #     if (pie_label) {
-    #         name <- name %>%
-    #             str_replace(" of the", "\nof the") %>%
-    #             str_replace(" by the", "\nby the") %>%
-    #             paste("<span style='font-size: 1.5rem; margin-bottom:3rem;'>", ., "\n </span>")
-    #     }
-    # 
-    #     return(name)
-    # }
     
+    disp_values <- reactiveValues(agency = NULL)
+    
+    # Update year ranges based on year type
     observe({
       validate(
         need(is.numeric(input$disp_start_year), 'Please enter a valid year.'),
@@ -444,7 +388,7 @@ function(input, output, session) {
       
     })
     
-
+    # Calculate all the values for disposition plot
     observeEvent(input$disp_button, {
 
         disp_values$town <- input$disp_city
@@ -484,87 +428,34 @@ function(input, output, session) {
 
         if (disp_values$disp_yr_type == "Offense") {
           disp_values$data <- disp_values$data[offense_year >= input$disp_start_year & 
-                                                 offense_year <= input$disp_end_year, .N, disposition_cat]
+                                                 offense_year <= input$disp_end_year, 
+                                               .N, disposition_cat]
           verb <- "allegedly committed"
         } else if (disp_values$disp_yr_type == "Filing") {
           disp_values$data <- disp_values$data[file_year >= input$disp_start_year & 
-                                                 file_year <= input$disp_end_year, .N, disposition_cat]
+                                                 file_year <= input$disp_end_year,
+                                               .N, disposition_cat]
           verb <- "filed"
         } else if (disp_values$disp_yr_type == "Arrest") {
           disp_values$data <- disp_values$data[arrest_year >= input$disp_start_year & 
-                                                 arrest_year <= input$disp_end_year, .N, disposition_cat]
+                                                 arrest_year <= input$disp_end_year, 
+                                               .N, disposition_cat]
           verb <- "resulting in arrest"
         } else if (disp_values$disp_yr_type == "Disposition") {
           disp_values$data <- disp_values$data[disposition_year >= input$disp_start_year & 
-                                                 disposition_year <= input$disp_end_year, .N, disposition_cat]
+                                                 disposition_year <= input$disp_end_year, 
+                                               .N, disposition_cat]
           verb <- "disposed"
         }
         
-        output$disp_str <- renderText(paste("drug-related", tolower(charge_str), "charges", verb, "between", disp_values$start_yr, "and", disp_values$end_yr, town_str,  dept_str, court_str))
-
-        # if (time_values$town == "All cities and towns" &
-        #     time_values$agency == "All agencies") {
-        # 
-        #     cat("Calculating for all cities, towns, and agencies\n")
-        # 
-        #     time_values$data <- all_loc_agency_v_time %>%
-        #         filter(if(time_values$outcome != "All outcomes")
-        #                 type == time_values$outcome else T) %>%
-        #         uncount(N) %>%
-        #         select(date, month, year)
-        # 
-        #     cat("Done calculating all!\n")
-        # 
-        # } else {
-        # 
-        #     q <- build_query(town = time_values$town,
-        #                      agency = time_values$agency,
-        #                      officer = time_values$officer,
-        #                      outcome = time_values$outcome,
-        #                      col = "date", group="citation")
-        # 
-        #     time_values$data <-
-        #         dbGetQuery(sqldb, q) %>%
-        #         mutate(date = lubridate::as_date(date),
-        #                year = lubridate::year(date),
-        #                month = lubridate::floor_date(date, "month")) %>%
-        #         as.data.table()
-        # }
-        # 
-        # if (time_values$compare) {
-        # 
-        #     if (time_values$town2 == "All cities and towns" &
-        #         time_values$agency2 == "All agencies") {
-        # 
-        #         time_values$data2 <- all_loc_agency_v_time %>%
-        #             filter(if(time_values$outcome2 != "All outcomes")
-        #                 type == time_values$outcome2 else T) %>%
-        #             uncount(N) %>%
-        #             select(date, month, year)
-        # 
-        #     } else {
-        # 
-        #         q <- build_query(town = time_values$town2,
-        #                          agency = time_values$agency2,
-        #                          officer = time_values$officer2,
-        #                          outcome = time_values$outcome2,
-        #                          col = "date", group="citation")
-        # 
-        #         time_values$data2 <- dbGetQuery(sqldb, q) %>%
-        #             mutate(date = lubridate::as_date(date),
-        #                    year = lubridate::year(date),
-        #                    month = lubridate::floor_date(date, "month")) %>%
-        #             as.data.table()
-        #     }
-
-        # } else {
-        #     time_values$data2 <- NULL
-        # }
+        output$disp_str <- renderText(paste("drug-related", tolower(charge_str), "charges", 
+                                            verb, "between", disp_values$start_yr, "and", 
+                                            disp_values$end_yr, town_str,  dept_str, court_str))
     })
 
+    # Create disposition plot
     output$disposition <- renderPlotly({
       
-
         validate(
             need(disp_values$data, 'Please select filters and press "Go."')
         )
@@ -587,73 +478,13 @@ function(input, output, session) {
                   labels = ~disposition_cat, values = ~N,
                   textposition = "inside"
                   ) %>%
-            add_pie() %>%
-              # add_pie(data = data_town,
-              #         title = annotation,
-              #         domain = list(x = c(0, .5), y = c(0, 1)),
-              #         marker = list(colors = town_stop_colors),
-              #         hovertemplate = '<i>Race</i>: %{label}<br><i>Number stopped</i>: %{value} (%{percent})<extra></extra>') %>%
-              # add_pie(data = data_town_pop,
-              #         title = paste("<span style='font-size:1.2rem'>",
-              #                       town_values$town, "Population\n(2018 estimate)\n </span>"),
-              #         domain = list(x = c(.5, 1), y = c(.2, .8)),
-              #         marker = list(colors = town_pop_colors),
-              #         hovertemplate = '<i>Race</i>: %{label}<br><i>Population (2018 estimate)</i>: %{value} (%{percent})<extra></extra>') %>%
+            add_pie(hovertemplate = '<i>Disposition</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
               layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                      showlegend = TRUE,
                      font=list(family = "GT America"),
                      hoverlabel=list(font = list(family = "GT America")))
-
-            # unit <- get_unit(time_values$outcome)
-
-            # data %>%
-            #     plot_ly(hovertemplate = paste0('%{y:,} charges ", ,
-            #                                    ' %{x|', date_format, "}<extra></extra>"),
-            #             line = list(color = '#3c3532')) %>%
-            #     add_lines(x=~x, y=~N)%>%
-            #     layout(yaxis = list(title = paste("Number of", unit), zeroline = F),
-            #            xaxis = list(title = "", zeroline = F),
-            #            font=list(family = "GT America"),
-            #            hoverlabel=list(font = list(family = "GT America")),
-            #            annotations = list(list(
-            #                showarrow = F, opacity = 0.7,
-            #                x = .5, xref="paper", xanchor = "center",
-            #                y = 1, yref="paper",
-            #                text = "<i>Click and drag to zoom in on a specific date range</i>"
-            #            )))
-        # } else if (time_values$compare == T) {
-        #     if (nrow(data) > 0 | nrow(data2) > 0) {
-        # 
-        #         name1 <- get_legend_name(time_values$town, time_values$agency,
-        #                                  time_values$officer, time_values$outcome)
-        #         name2 <- get_legend_name(time_values$town2, time_values$agency2,
-        #                                  time_values$officer2, time_values$outcome2)
-        # 
-        #         unit1 <- unit <- get_unit(time_values$outcome)
-        #         unit2 <- unit <- get_unit(time_values$outcome2)
-        # 
-        #         plot_ly() %>%
-        #             add_lines(data=data, x=~x, y=~N, name=name1, opacity=.7,
-        #                       line = list(color = '#3c3532'),
-        #                       hovertemplate = paste0('%{y:,} ', unit1, " ", link,
-        #                                              ' %{x|', date_format, "}<extra></extra>"))%>%
-        #             add_lines(data=data2, x=~x, y=~N,name=name2, opacity=.7,
-        #                       line = list(color = "#ef404d"),
-        #                       hovertemplate = paste0('%{y:,} ', unit2, " ", link,
-        #                                              ' %{x|', date_format, "}<extra></extra>")) %>%
-        #             add_annotations(showarrow = F, opacity = 0.7,
-        #                             x = .5, xref="paper", xanchor = "center",
-        #                             y = 1, yref="paper",
-        #                             text = "<i>Click and drag to zoom in on a specific date range</i>") %>%
-        #             layout(yaxis = list(title = "Number of traffic stops", zeroline = F),
-        #                    xaxis = list(title = "", zeroline = F),
-        #                    font=list(family = "GT America"),
-        #                    hoverlabel=list(font = list(family = "GT America")),
-        #                    legend = list(x = 0.5, y=-.4,
-        #                                  xanchor="center",
-        #                                  bgcolor = alpha('lightgray', 0.4)))
-        #     }
+          
         } else {
             # If there are no stops for the filter
             empty_plotly("charges")
