@@ -4,7 +4,7 @@ library(shinycssloaders)
 library(showtext)
 # library(leaflet)
 library(plotly)
-# library(shinyjs)
+library(shinyjs)
 library(data.table)
 library(readr)
 
@@ -43,16 +43,16 @@ names(all_courts) <- court_names
 #                   "Criminal Citation"="Crim", 
 #                   "Arrest"="Arrest")
 # 
-# log_tooltip_html <- "
-# <div id='log-tooltip' width=20px>
-#     <b>What is a logarithmic scale?</b>
-#     <p>Logarithmic scales are an alternative way of presenting numerical data that can more helpfully represent relative difference between wide-ranging values.</p>
-#     
-#     <p>Instead of spacing values along a scale linearly (e.g., 1, 2, 3, 4), a logarithmic scale spaces out values logarithmically (e.g., 1, 10, 100, 1,000).</p>
-#     <img width=200px src='log_example.png' />
-# </div>
-# "
-# 
+log_tooltip_html <- "
+<div id='log-tooltip' width=20px>
+    <b>What is a logarithmic scale?</b>
+    <p>Logarithmic scales are an alternative way of presenting numerical data that can more helpfully represent relative difference between wide-ranging values.</p>
+
+    <p>Instead of spacing values along a scale linearly (e.g., 1, 2, 3, 4), a logarithmic scale spaces out values logarithmically (e.g., 1, 10, 100, 1,000).</p>
+    <img width=200px src='log_example.png'>
+</div>
+"
+
 # officer_tooltip_html <- "
 # <div id='officer-id-tooltip' width=20px>
 #     The format of officer identifiers varies widely between law enforcement agencies - some agencies just use numbers, some include letters, etc. The options presented here reflect the IDs exactly as reported by MassDOT. We anticipate some may be typos.
@@ -192,36 +192,43 @@ fluidPage(
                 # ),
        
        "Explore the Data:",
-       # Mapping stops --------------------------------------------
-       # tabPanel("Mapping Stops"#, 
-                # wellPanel(id="internal_well",
-                #   splitLayout(
-                #     dateInput("town_start_date", "Start Date",
-                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #     dateInput("town_end_date", "End Date",
-                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #   splitLayout(
-                #     radioButtons("towns_radio", "Value Type", 
-                #                  choiceValues=c("Total stops", 
-                #                            "Stops per capita"),
-                #                  choiceNames=c("Total stops", 
-                #                                 "Stops per 1,000 population"),
-                #                  selected="Total stops", inline=F),
-                #     div(id="town_log_span",
-                #         div(tags$b("Numeric Scale")),
-                #          checkboxInput("town_log", 
-                #                        span("Plot logarithmic scale", 
-                #                             a(icon("info-circle"), 
-                #                               id="log_tooltip",
-                #                               `data-toggle`="tooltip", 
-                #                               title=log_tooltip_html)), 
-                #                        value=T)
-                #          )),
-                #   actionButton("map_stops_button", "Go")),
-                # withSpinner(leafletOutput("stops_by_town"), type=4, color="#b5b5b5", size=0.5)
-                # 
-       # ),
        
+       # Mapping charges --------------------------------------------
+       tabPanel("Mapping Charges",
+          wellPanel(id="internal_well",
+             em("Explore the 94C charges across Massachusetts. Filter the charges with the following criteria:"),
+             fluidRow(
+               splitLayout(
+                 selectizeInput("map_dept", label="Agency / Department", c("All departments", all_depts)),
+                 selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts)),
+                 selectizeInput("map_charge", label="Charge", c("All charges", all_charges))
+               ),
+               splitLayout(
+                 selectizeInput("map_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
+                 numericInput("map_start_year", "Start Year",
+                              value = "2000", min="2000", max="2018"),
+                 numericInput("map_end_year", "End Year",
+                              value = "2014", min="2000", max="2018")),
+               splitLayout(
+                 radioButtons("map_radio", "Value Type",
+                              choiceValues=c("Total charges",
+                                        "Charges per capita"),
+                              choiceNames=c("Total charges",
+                                             "Charges per 1,000 population"),
+                              selected="Total charges", inline=F),
+                 div(id="map_log_span",
+                     div(tags$b("Numeric Scale")),
+                      checkboxInput("map_log",
+                                    span("Plot logarithmic scale",
+                                         a(icon("info-circle"),
+                                           id="log_tooltip",
+                                           `data-toggle`="tooltip",
+                                           title=log_tooltip_html)),
+                                    value=T)
+                      ))),
+               actionButton("map_button", "Go")),
+         withSpinner(leafletOutput("charges_by_town"), type=4, color="#b5b5b5", size=0.5)
+       ),
        
        # Disposition ------------------------------------------
        tabPanel("Disposition", 

@@ -7,7 +7,7 @@ library(data.table)
 library(lubridate)
 library(scales)
 # library(shinyjs)
-# library(sf)
+library(sf)
 # library(DBI)
 # library(RSQLite)
 # library(pool)
@@ -16,6 +16,7 @@ library(scales)
 charge_cats_df <- read_csv("data/94c_charge_codes.csv")
 disp_cats_df <- read_csv("data/94c_dispositions.csv")
 disp_colors <- readRDS("data/disp_colors.RDS")
+ma_towns <- read_rds("data/ma_towns.rds")
 
 combined94c_data <- fread("94c_combined.csv") %>%
   merge(charge_cats_df, by="charge") %>%
@@ -52,42 +53,10 @@ court_names <- data.frame(all_courts) %>%
 
 names(all_courts) <- court_names
 
-# # Connect to sql database using pool to manage connections
-# sqldb <- dbPool(
-#     drv = SQLite(),
-#     dbname = "data/statewide_2002_21.sqlite"
-# )
-# 
-# # Load other datasets
-# officers_per_agency <- read_rds("data/sep/officers_per_agency.rds")
-# mapping_df <- read_rds("data/sep/mapping.rds") # stops, not offenses
-# ma_towns <- read_rds("data/ma_towns.rds")
-# all_loc_agency_v_time <- fread("data/sep/all_loc_agency_stops_v_time.csv")  %>%
-#     mutate_at(vars(date, month), as_date)
-# all_offenses <- fread("data/sep/all_offenses_by_date.csv")  %>%
-#     mutate(date = as_date(date))
-# data_mass_race <- read_rds("data/mass_race.RDS") %>%
-#     rename(var = race) %>%
-#     arrange(var)
-# town_race_pop <- readRDS("data/towns_race.rds")
-# named_colors <- readRDS("data/offense_colors.rds")
-# violations <- read_csv("data/violations.csv",
-#                        col_types = cols(
-#                            offense = col_character(),
-#                            group = col_character()
-#                        ))
-# 
-# colors <- c("White" = "#3c3532", 
-#             "Black" = "#681b40", 
-#             "Hispanic/Latinx" = "#ef404d",
-#             "Asian" = "#fabeaf", 
-#             "Middle Eastern" =  "#fbb416", 
-#             "Native American" = "#a7d7b5", 
-#             "Unknown" = "white",
-#             "Other" = "white")
-# 
 function(input, output, session) {
 
+    # Helper functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    # Empty plotly
     empty_plotly <- function(label) {
         plot_ly() %>%
             layout(yaxis = list(zeroline = F, showticklabels = F),
@@ -104,6 +73,7 @@ function(input, output, session) {
             )
     }
     
+    # Filter data and get descriptive sentence
     filter_and_get_label <- function(data, town = "All cities and towns",
                                      agency = "All departments",
                                      crt = "All courts",
@@ -171,6 +141,35 @@ function(input, output, session) {
       
       list(data, label)
       
+    }
+    
+    # Determine the year bounds
+    get_year_bounds <- function(year_type, start_year, end_year) {
+        if (year_type == "Arrest") {
+          yr_max <- combined94c_data %>% pull(arrest_year) %>% max(na.rm = TRUE)
+          yr_min <- combined94c_data %>% pull(arrest_year) %>% min(na.rm = TRUE)
+        } else if (year_type == "Disposition") {
+          yr_max <- combined94c_data %>% pull(disposition_year) %>% max(na.rm = TRUE)
+          yr_min <- combined94c_data %>% pull(disposition_year) %>% min(na.rm = TRUE)
+        } else if (year_type == "Filing") {
+          yr_max <- combined94c_data %>% pull(file_year) %>% max(na.rm = TRUE)
+          yr_min <- combined94c_data %>% pull(file_year) %>% min(na.rm = TRUE)
+        } else if (year_type == "Offense") {
+          yr_max <- combined94c_data %>% pull(offense_year) %>% max(na.rm = TRUE)
+          yr_min <- combined94c_data %>% pull(offense_year) %>% min(na.rm = TRUE)
+        }
+        
+        start_value <- start_year
+        if (start_year < yr_min) {
+          start_value <- yr_min
+        }
+        
+        end_value <- end_year
+        if (end_year > yr_max) {
+          end_value <- yr_max
+        }
+        
+        list(yr_min, yr_max, start_value, end_value)
     }
 #     
 #     build_query <- function(start_date="2002-01-01", 
@@ -314,103 +313,164 @@ function(input, output, session) {
 #         }
 #     )
 #     
-#     # Mapping stops -------------------------------------------------------------------
-#     
-#     stops_per_county <- reactiveValues(data=NULL)
-#     
-#     observeEvent(input$map_stops_button, {
-#         
-#         stops_sf <- mapping_df[date >= input$town_start_date & 
-#                                    date <= input$town_end_date, 
-#                                .(N=sum(N)), loc] %>%
-#             merge(ma_towns, by.y = "town", by.x = "loc", all=T) %>% 
-#             mutate(N= replace_na(N, 0)) %>% # Fill in 0s for towns with no stops
-#             select(-TOWN, town=loc) %>%
-#             st_as_sf() %>%
-#             st_transform('+proj=longlat +datum=WGS84') 
-#         
-#         if (input$towns_radio == "Stops per capita") {
-#             stops_sf <- stops_sf %>%
-#                 mutate(N = (N / pop) * 1e3)
-#         }
-#         
-#         stops_per_county$data <- stops_sf
-#         stops_per_county$log <- input$town_log
-#         stops_per_county$percap <- input$towns_radio
-#     })
-#     
-#     # Replace legend labels with custom format
-#     stopsLabelFormat = function(..., log){ 
-#         if (log) {
-#             function(type = "numeric", cuts){ 
-#                 10**as.numeric(cuts) %>%
-#                     scales::number(big.mark=",")
-#             } 
-#         } else {
-#             labelFormat(...)
-#         }
-#     }
-#     
-#     output$stops_by_town <- renderLeaflet({
-#         validate(
-#             need(stops_per_county$data, 'Please select date range and press "Go."')
-#         )
-#         
-#         palette_domain <- if (stops_per_county$log) log10(stops_per_county$data$N) else stops_per_county$data$N
-#         palette_domain <- replace(palette_domain, 
-#                                   palette_domain == -Inf, NA)
-#         
-#         if (stops_per_county$percap == "Total stops") {
-#             legend_title <- "<a style='font-family:GT America; color: dimgrey'>Total <br>traffic stops</a>"
-#             label_accuracy <- 1
-#             label_suffix <- ""
-#         } else {
-#             legend_title <- "<a style='font-family:GT America; color: dimgrey'>Traffic stops<br>per 1,000</a>"
-#             label_accuracy <- 1
-#             label_suffix <- "per 1,000 population"
-#         }
-#         
-#         pal_total_stops <- colorNumeric(
-#             palette = "inferno",
-#             domain = palette_domain,
-#             na.color = viridis_pal(option="inferno")(10) %>% head(1)
-#         )
-#         
-#         pal_total_stops_noNA <- colorNumeric(
-#             palette = "inferno",
-#             domain = palette_domain,
-#             na.color = NA
-#         )
-#         
-#         leaflet(options = leafletOptions(attributionControl = T)) %>%
-#             addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
-#             addPolygons(data = stops_per_county$data,
-#                         fillOpacity = 0.8, 
-#                         weight = 1, 
-#                         fillColor = if(stops_per_county$log) ~pal_total_stops(log10(N)) else  ~pal_total_stops(N),
-#                         stroke=F,
-#                         smoothFactor=.5,
-#                         label = ~lapply(paste0("<b>", town, "</b></br>", 
-#                                                scales::number(N, big.mark=",", accuracy=label_accuracy), " traffic stops ", label_suffix), 
-#                                         htmltools::HTML),
-#                         color="none",
-#                         group="poly")  %>%
-#             addLegend(pal = pal_total_stops_noNA,
-#                       values = palette_domain,
-#                       labFormat = stopsLabelFormat(log=stops_per_county$log),
-#                       position = "topright",
-#                       title = legend_title,
-#             )  %>%
-#             addEasyButton(easyButton(
-#                 icon="fa-home", title="Reset",
-#                 onClick=JS("function(btn, map){ 
-#                    var groupLayer = map.layerManager.getLayerGroup('poly');
-#                    map.fitBounds(groupLayer.getBounds());
-#                }"))) %>%
-#             addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>", 
-#                        "bottomleft", className="logo-control")
-#     })
-#     
+    # Mapping stops -------------------------------------------------------------------
+
+    charges_map <- reactiveValues(data=NULL)
+    
+    # Update year ranges based on year type
+    observe({
+      validate(
+        need(is.numeric(input$map_start_year), 'Please enter a valid year.'),
+        need(is.numeric(input$map_end_year), 'Please enter a valid year.')
+      )
+      
+      bounds <- get_year_bounds(input$map_yr_type, input$map_start_year, input$map_end_year)
+      yr_min <- bounds[[1]]
+      yr_max <- bounds[[2]]
+      start_value <- bounds[[3]]
+      end_value <- bounds[[4]]
+      
+      updateNumericInput(session,
+                         "map_start_year", value=start_value,
+                         max=yr_max, min=yr_min)
+      updateNumericInput(session,
+                         "map_end_year", value=end_value,
+                         max=yr_max, min=yr_min)
+      
+    })
+
+    observeEvent(input$map_button, {
+      
+      results <- filter_and_get_label(
+        combined94c_data, 
+        agency = input$map_dept,
+        crt = input$map_court,
+        chrg = input$map_charge,
+        year_type = input$map_yr_type,
+        start_year=input$map_start_year,
+        end_year=input$map_end_year)
+      
+      data <- results[[1]]
+      # label <- results[[2]]
+
+        charges_sf <- data[, .N, jurisdiction] %>%
+            mutate(jurisdiction = case_when(
+              jurisdiction == "North Attleboro" ~ "N Attleborough",
+              str_starts(jurisdiction, "East ") ~ str_replace(jurisdiction, "East ", "E "),
+              str_starts(jurisdiction, "West ") ~ str_replace(jurisdiction, "West ", "W "),
+              str_starts(jurisdiction, "North ") ~ str_replace(jurisdiction, "North ", "N "),
+              str_starts(jurisdiction, "South ") ~ str_replace(jurisdiction, "South ", "S "),
+              str_starts(jurisdiction, "Mount ") ~ str_replace(jurisdiction, "Mount ", "Mt "),
+              str_starts(jurisdiction, "Great ") ~ str_replace(jurisdiction, "Great ", "Gt "),
+              jurisdiction == "Lunenberg" ~ "Lunenburg",
+              jurisdiction == "Manchester" ~ "Manchester-By-The-Sea",
+              T ~ jurisdiction
+            )) %>%
+            merge(ma_towns, by.y = "town", by.x = "jurisdiction", all=T) %>%
+            filter(!is.na(pop)) %>%
+            mutate(N= replace_na(N, 0)) %>% # Fill in 0s for towns with no stops
+            select(-TOWN, town=jurisdiction) %>%
+            st_as_sf() %>%
+            st_transform('+proj=longlat +datum=WGS84')
+
+        if (input$map_radio == "Charges per capita") {
+          charges_sf <- charges_sf %>%
+                mutate(N = (N / pop) * 1e3)
+        }
+
+        charges_map$data <- charges_sf
+        charges_map$log <- input$map_log
+        charges_map$percap <- input$map_radio
+    })
+
+    # Replace legend labels with custom format
+    stopsLabelFormat = function(..., log){
+        if (log) {
+            function(type = "numeric", cuts){
+                10**as.numeric(cuts) %>%
+                    scales::number(big.mark=",", accuracy=1)
+            }
+        } else {
+            labelFormat(...)
+        }
+    }
+
+    output$charges_by_town <- renderLeaflet({
+        validate(
+            need(charges_map$data, 'Please select date range and press "Go."')
+        )
+
+        palette_domain <- if (charges_map$log) log10(charges_map$data$N) else charges_map$data$N
+        palette_domain <- replace(palette_domain,
+                                  palette_domain == -Inf, NA)
+
+        if (charges_map$percap == "Total charges") {
+            legend_title <- "<a style='font-family:GT America; color: dimgrey'>Total <br> 94C charges</a>"
+            label_accuracy <- 1
+            label_suffix <- ""
+        } else {
+            legend_title <- "<a style='font-family:GT America; color: dimgrey'>94C charges<br>per 1,000</a>"
+            label_accuracy <- 1
+            label_suffix <- " per 1,000 population"
+        }
+
+        pal_total_stops <- colorNumeric(
+            palette = "inferno",
+            domain = palette_domain,
+            na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
+        )
+        
+        pal_one_town <- colorNumeric(
+          palette = c("#bbbbbb", "red"),
+          domain = c(0, max(palette_domain, na.rm=T)),
+          na.color = viridis_pal(option="inferno")(10) %>% tail(1)
+        )
+        
+        pal_total_stops_noNA <- colorNumeric(
+            palette = "inferno",
+            domain = palette_domain,
+            na.color = NA
+        )
+        
+        one_town <- charges_map$data %>%
+          filter(N != 0) %>%
+          nrow() == 1
+        
+        leaflet(options = leafletOptions(attributionControl = T)) %>%
+            addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+            addPolygons(data = charges_map$data,
+                        fillOpacity = 0.8,
+                        weight = 1,
+                        fillColor = if (one_town & charges_map$log) {
+                          ~pal_one_town(N)
+                        } else if (charges_map$log) {
+                          ~pal_total_stops(log10(N))
+                        } else {
+                          ~pal_total_stops(N)
+                        },
+                        stroke=F,
+                        smoothFactor=.5,
+                        label = ~lapply(paste0("<b>", town, "</b></br>",
+                                               scales::number(N, big.mark=",", accuracy=label_accuracy), " charges", label_suffix),
+                                        htmltools::HTML),
+                        color="none",
+                        group="poly")  %>%
+            addLegend(pal = pal_total_stops_noNA,
+                      values = palette_domain,
+                      labFormat = stopsLabelFormat(log=charges_map$log),
+                      position = "topright",
+                      title = legend_title,
+            )  %>%
+            addEasyButton(easyButton(
+                icon="fa-home", title="Reset",
+                onClick=JS("function(btn, map){
+                   var groupLayer = map.layerManager.getLayerGroup('poly');
+                   map.fitBounds(groupLayer.getBounds());
+               }"))) %>%
+            addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>",
+                       "bottomleft", className="logo-control")
+    })
+     
     # Disposition -----------------------------------------------------------------
     
     disp_values <- reactiveValues(agency = NULL)
@@ -422,31 +482,13 @@ function(input, output, session) {
         need(is.numeric(input$disp_end_year), 'Please enter a valid year.')
         )
       
-      print("year has changed")
-      
-      if (input$disp_yr_type == "Arrest") {
-        yr_max <- combined94c_data %>% pull(arrest_year) %>% max(na.rm = TRUE)
-        yr_min <- combined94c_data %>% pull(arrest_year) %>% min(na.rm = TRUE)
-      } else if (input$disp_yr_type == "Disposition") {
-        yr_max <- combined94c_data %>% pull(disposition_year) %>% max(na.rm = TRUE)
-        yr_min <- combined94c_data %>% pull(disposition_year) %>% min(na.rm = TRUE)
-      } else if (input$disp_yr_type == "Filing") {
-        yr_max <- combined94c_data %>% pull(file_year) %>% max(na.rm = TRUE)
-        yr_min <- combined94c_data %>% pull(file_year) %>% min(na.rm = TRUE)
-      } else if (input$disp_yr_type == "Offense") {
-        yr_max <- combined94c_data %>% pull(offense_year) %>% max(na.rm = TRUE)
-        yr_min <- combined94c_data %>% pull(offense_year) %>% min(na.rm = TRUE)
-      }
-      
-      start_value <- input$disp_start_year
-      if (input$disp_start_year < yr_min) {
-        start_value <- yr_min
-      }
-      
-      end_value <- input$disp_end_year
-      if (input$disp_end_year > yr_max) {
-        end_value <- yr_max
-      }
+      bounds <- get_year_bounds(input$disp_yr_type, 
+                                input$disp_start_year, 
+                                input$disp_end_year)
+      yr_min <- bounds[[1]]
+      yr_max <- bounds[[2]]
+      start_value <- bounds[[3]]
+      end_value <- bounds[[4]]
       
       updateNumericInput(session,
                          "disp_start_year", value=start_value,
