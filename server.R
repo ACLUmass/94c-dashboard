@@ -103,6 +103,75 @@ function(input, output, session) {
                    ))
             )
     }
+    
+    filter_and_get_label <- function(data, town = "All cities and towns",
+                                     agency = "All departments",
+                                     crt = "All courts",
+                                     chrg = "All charges",
+                                     disp = "All dispositions",
+                                     year_type=NA,
+                                     start_year=NA,
+                                     end_year=NA) {
+      
+      town_str <- "in Massachusetts"
+      dept_str <- ""
+      court_str <- ""
+      disp_str <- ""
+      year_str <- ""
+      charge_str <- ""
+      
+      if(town != "All cities and towns") {
+        data <- data[jurisdiction == town]
+        town_str <- paste("in", town)
+      }
+      
+      if(agency != "All departments") {
+        data <- data[department == agency]
+        dept_str <- paste("by the", agency, "Police Department")
+      }
+      
+      if(crt != "All courts") {
+        cat("court:", crt, "\n")
+        data <- data[court == crt]
+        i_court_name = match(crt, all_courts)
+        court_str <- paste("and heard by the", names(all_courts)[i_court_name])
+      }
+      
+      if(chrg != "All charges") {
+        cat("charge:", chrg, "\n")
+        data <- data[charge_cat == chrg]
+        charge_str <- chrg
+      }
+      
+      if(disp != "All dispositions") {
+        data <- data[disposition_cat == disp]
+        disp_str <- paste("disposed as", disp)
+      }
+      
+      if (!is.na(year_type)) {
+        if (year_type == "Offense") {
+          data <- data[offense_year >= start_year & offense_year <= end_year]
+          verb <- "allegedly committed"
+        } else if (year_type == "Filing") {
+          data <- data[file_year >= start_year & file_year <= end_year]
+          verb <- "filed"
+        } else if (year_type == "Arrest") {
+          data <- data[arrest_year >= start_year & arrest_year <= end_year]
+          verb <- "resulting in arrest"
+        } else if (year_type == "Disposition") {
+          data <- data[disposition_year >= start_year & disposition_year <= end_year]
+          verb <- "disposed"
+        }
+        year_str <- paste(verb, "between", start_year, "and", end_year)
+      }
+      
+      label <- paste("drug-related", tolower(charge_str), "charges", year_str,
+                     town_str, dept_str, court_str, disp_str)
+      label <- str_squish(label)
+      
+      list(data, label)
+      
+    }
 #     
 #     build_query <- function(start_date="2002-01-01", 
 #                             end_date="2021-02-04", 
@@ -398,59 +467,23 @@ function(input, output, session) {
         disp_values$disp_yr_type <- input$disp_yr_type
         disp_values$start_yr <- input$disp_start_year
         disp_values$end_yr <- input$disp_end_year
-        disp_values$data <- combined94c_data
+        # disp_values$data <- combined94c_data
         
-        town_str <- "in Massachusetts"
-        dept_str <- ""
-        court_str <- ""
-        charge_str <- ""
+        results <- filter_and_get_label(
+          combined94c_data, town = disp_values$town,
+          agency = disp_values$agency,
+          crt = disp_values$court,
+          chrg = disp_values$charge,
+          # disp = "All dispositions",
+          year_type = disp_values$disp_yr_type,
+          start_year=disp_values$start_yr,
+          end_year=disp_values$end_yr)
         
-        if(disp_values$town != "All cities and towns") {
-          disp_values$data <- disp_values$data[jurisdiction == disp_values$town]
-          town_str <- paste("in", disp_values$town)
-        }
+        data <- results[[1]]
+        disp_values$data <- data[, .N, disposition_cat]
         
-        if(disp_values$agency != "All departments") {
-          disp_values$data <- disp_values$data[department == disp_values$agency]
-          dept_str <- paste("by the", disp_values$agency, "Police Department")
-        }
-        
-        if(disp_values$court != "All courts") {
-          disp_values$data <- disp_values$data[court == disp_values$court]
-          i_court_name = match(disp_values$court, all_courts)
-          court_str <- paste("and heard by the", names(all_courts)[i_court_name])
-        }
-        
-        if(disp_values$charge != "All charges") {
-          disp_values$data <- disp_values$data[charge_cat == disp_values$charge]
-          charge_str <- disp_values$charge
-        }
-
-        if (disp_values$disp_yr_type == "Offense") {
-          disp_values$data <- disp_values$data[offense_year >= input$disp_start_year & 
-                                                 offense_year <= input$disp_end_year, 
-                                               .N, disposition_cat]
-          verb <- "allegedly committed"
-        } else if (disp_values$disp_yr_type == "Filing") {
-          disp_values$data <- disp_values$data[file_year >= input$disp_start_year & 
-                                                 file_year <= input$disp_end_year,
-                                               .N, disposition_cat]
-          verb <- "filed"
-        } else if (disp_values$disp_yr_type == "Arrest") {
-          disp_values$data <- disp_values$data[arrest_year >= input$disp_start_year & 
-                                                 arrest_year <= input$disp_end_year, 
-                                               .N, disposition_cat]
-          verb <- "resulting in arrest"
-        } else if (disp_values$disp_yr_type == "Disposition") {
-          disp_values$data <- disp_values$data[disposition_year >= input$disp_start_year & 
-                                                 disposition_year <= input$disp_end_year, 
-                                               .N, disposition_cat]
-          verb <- "disposed"
-        }
-        
-        output$disp_str <- renderText(paste("drug-related", tolower(charge_str), "charges", 
-                                            verb, "between", disp_values$start_yr, "and", 
-                                            disp_values$end_yr, town_str,  dept_str, court_str))
+        label <- results[[2]]
+        output$disp_str <- renderText(label)
     })
 
     # Create disposition plot
@@ -491,6 +524,135 @@ function(input, output, session) {
             empty_plotly("charges")
         }
 
+    })
+    
+    # Stops over time -----------------------------------------------------------------
+    
+    time_values <- reactiveValues(agency = NULL)
+    
+    observeEvent(input$time_button, {
+      
+      time_values$town <- input$time_city
+      time_values$agency <- input$time_dept
+      time_values$court <- input$time_court
+      time_values$charge <- input$time_charge
+      time_values$disp <- input$time_disp
+      
+      time_values$compare <- input$compare_time
+      
+      time_values$town2 <- input$time_city2
+      time_values$agency2 <- input$time_dept2
+      time_values$court2 <- input$time_court2
+      time_values$charge2 <- input$time_charge2
+      time_values$disp2 <- input$time_disp2
+      
+      results <- filter_and_get_label(
+        combined94c_data, 
+        town = time_values$town,
+        agency = time_values$agency,
+        crt = time_values$court,
+        chrg = time_values$charge,
+        disp = time_values$disp)
+      
+      data <- results[[1]]
+      time_values$data <- data
+      
+      time_values$label <- results[[2]]
+      
+      if (time_values$compare) {
+          
+        results <- filter_and_get_label(
+          combined94c_data, 
+          town = time_values$town2,
+          agency = time_values$agency2,
+          crt = time_values$court2,
+          chrg = time_values$charge2,
+          disp = time_values$disp2)
+        
+        data <- results[[1]]
+        time_values$data2 <- data#[, .N, disposition_cat]
+        
+        time_values$label2 <- results[[2]]
+        
+      } else {
+        time_values$data2 <- NULL
+      }
+    })
+    
+    output$stops_v_time <- renderPlotly({
+      
+      validate(
+        need(time_values$agency, 'Please select filters and press "Go."')
+      )
+      
+      data <- time_values$data
+      data2 <- if (time_values$compare) time_values$data2 else NULL
+      
+      if (input$year_type == "Arrest") {
+        data <- data[, .N, .(x=arrest_year)] %>% arrange(x)
+        data2 <- if (time_values$compare) data2[, .N, .(x=arrest_year)] %>% arrange(x) else NULL
+        
+      } else if (input$year_type == "Disposition") {
+        data <- data[, .N, .(x=disposition_year)] %>% arrange(x)
+        data2 <- if (time_values$compare) data2[, .N, .(x=disposition_year)] %>% arrange(x) else NULL
+        
+      } else if (input$year_type == "Filing") {
+        data <- data[, .N, .(x=file_year)] %>% arrange(x)
+        data2 <- if (time_values$compare) data2[, .N, .(x=file_year)] %>% arrange(x) else NULL
+        
+      } else if (input$year_type == "Offense") {
+        data <- data[, .N, .(x=offense_year)] %>% arrange(x)
+        data2 <- if (time_values$compare) data2[, .N, .(x=offense_year)] %>% arrange(x) else NULL
+      }
+      
+      if (time_values$compare == F & nrow(data) > 0) {
+        
+        data %>%
+          plot_ly(hovertemplate = '%{y:,} charges in %{x}<extra></extra>',
+                  line = list(color = '#3c3532', width=3.5)) %>% 
+          add_lines(x=~x, y=~N)%>%
+          layout(yaxis = list(title = "Number of charges", zeroline = F),
+                 xaxis = list(title = paste("Year of", input$year_type), zeroline = F),
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America")),
+                 annotations = list(list(
+                   showarrow = F, opacity = 0.7,
+                   x = .5, xref="paper", xanchor = "center",
+                   y = 1.05, yref="paper",
+                   text = "<i>Click and drag to zoom in on a specific date range</i>"
+                 )))
+        
+      } else if (time_values$compare == T) {
+        
+        if (nrow(data) > 0 | nrow(data2) > 0) {
+          
+          plot_ly() %>% 
+            add_lines(data=data, x=~x, y=~N, name=time_values$label, opacity=.7,
+                      line = list(color = '#3c3532', width=3.5),
+                      hovertemplate = '%{y:,} charges in %{x}<extra></extra>')%>%
+            add_lines(data=data2, x=~x, y=~N,name=time_values$label2, opacity=.7,
+                      line = list(color = "#ef404d", width=3.5),
+                      hovertemplate = '%{y:,} charges in %{x}<extra></extra>') %>%
+            add_annotations(showarrow = F, opacity = 0.7,
+                            x = .5, xref="paper", xanchor = "center",
+                            y = 1.05, yref="paper",
+                            text = "<i>Click and drag to zoom in on a specific date range</i>") %>%
+            layout(yaxis = list(title = "Number of charges", zeroline = F),
+                   xaxis = list(title = paste("Year of", input$year_type), zeroline = F),
+                   font=list(family = "GT America"),
+                   hoverlabel=list(font = list(family = "GT America")),
+                   legend = list(x = 0.5, y=-.4,
+                                 xanchor="center",
+                                 bgcolor = alpha('lightgray', 0.4)))
+        } else {
+          empty_plotly("charges")
+        }
+      
+      } else {
+        # If there are no stops for the filter
+        empty_plotly("charges")
+      }
+      
     })
 
 #     # Stops by offense ----------------------------------------------------------------

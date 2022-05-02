@@ -19,6 +19,7 @@ all_depts <- combined94c_data[order(department), department] %>%
 all_courts <- combined94c_data[order(court), court] %>%
   unique()
 all_charges <- charge_cats$charge_cat
+all_disps <- readRDS("data/disp_colors.rds") %>% names()
 
 # Rename courts to be more accessible
 court_names <- data.frame(all_courts) %>%
@@ -71,302 +72,337 @@ theme_update(text = element_text(family="GT America"),
 fluidPage(
   # useShinyjs(),  # Set up shinyjs
   theme = "94c_app.css",
-          
-          # Add favicon          
-          tags$head(
-              tags$link(rel = "shortcut icon", href = "favicon.ico"),
-              tags$link(rel = "icon", type = "image/png", sizes = "512x512", href = "favicon.png")
-          ),
+    
+    # Add favicon          
+    tags$head(
+      tags$link(rel = "shortcut icon", href = "favicon.ico"),
+      tags$link(rel = "icon", type = "image/png", sizes = "512x512", href = "favicon.png")
+    ),
   
-          # # Add javascript for log tooltip
-          # tags$script(HTML('
-          #      $( document ).on("shiny:sessioninitialized", function(event) {
-          #           $(\'a[data-toggle="tooltip"]\').tooltip({
-          #               animated: "fade",
-          #               placement: "bottom",
-          #               html: true
-          #           });      
-          #      });'
-          # )),
-          
-          # App title
-          div(id="title",
-              titlePanel("Prosecuting Drugs in Massachusetts, 2003 - 2014")
-          ),
-          
-          div(
-              navlistPanel(widths = c(3, 9), id="panels",
-                           
-                           # About ----------------------------------------------------
-                           tabPanel("About", 
-                                    
-                                    h3("Explore the History of Drug Prosecution in Massachusetts"),
-                                    br(),
-                                    p("Explore the complete record of drug-related criminal charges filed between 2003 and 2014 and prosecuted under",
-                                      a("MGL Chapter 94C,", href="https://malegislature.gov/laws/generallaws/parti/titlexv/chapter94c"), 
-                                       "as documented in data obtained from the Massachusetts Trial Court."),
-                           # 
-                           # div(id="dev-wait",
-                           #     wellPanel(
-                           #       icon('exclamation-triangle'),
-                           #       h4("Disclaimer"),
-                           #       em("Based on discussions with MassDOT, ACLUM understands that MassDOT’s historical record of traffic stops can change due to updates in reporting requirements, corrections of records, delays by municipalities in reporting their warnings and citations, and other factors. Therefore, the record of traffic stops presented here reflects only the MassDOT database as it was on February 4, 2021.",)
-                           #     )
-                           # ),
-                           
-                           h3("About the Data"),
-                           
-                           h4("Where did the data come from?"),
-                           "The data available here are the result of a 2017 lawsuit, brought in response to the misconduct of state drug-lab chemist Sonja Farak and subsequent mishandling by the Massachusetts Attorney General's Office:",
-                            a(href="https://www.aclum.org/en/cases/committee-public-counsel-services-v-attorney-general",
-                              em("Committee for Public Counsel Services (CPCS) v. Attorney General.")),
-                           
-                           "For more information about the drug scandal, see the",
-                             a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information"), "or the", 
-                             HTML("<a href='https://www.netflix.com/title/80233339'>Netflix documentary <i>How to Fix a Drug Scandal</i></a>."),
-                           #          
-                                    br(),br(),
-                                    h4("What's included?"),
-                                    "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset includes information regarding the criminal statute under Chapter 94C applicable to each charge; the years of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
-                                    
-                                    br(),br(),
-                                    h4("What's not included?"),
-                                    "As required and verified by the Court, the data available here have been scrubbed of any personally identifiable information regarding the individuals involved in the criminal cases.",
-                                    
-                                    br(),br(),
-                                    h4("Why does it matter?"),
-                                    
-                                    "Not only did these data enable the dismissal of tens of thousands of cases in response to misconduct by the AGO and drug chemists",
-                                      a(href="https://www.bostonglobe.com/metro/2019/09/25/charges-tossed-because-they-were-tainted-former-amherst-lab-chemist-misconduct/MUPgdHeLy8bdrzl5KGtvIN/story.html",
-                                        target="_blank",
-                                        "Sonja Farak"), "and",
-                                    a(href="https://www.npr.org/sections/thetwo-way/2017/04/20/524894955/massachusetts-throws-out-more-than-21-000-convictions-in-drug-testing-scandal", "Annie Dookhan;", target="_blank"),
-                                    "this dataset documents the intricacies of drug prosecution across Massachusetts for over a decade. Notably, the timeframe captured by the data includes Massachusetts'",
-                                    a("decriminalization", href="https://archive.boston.com/news/local/articles/2008/11/05/voters_approve_marijuana_law_change/", target="_blank"),
-                                    "of marijuana in 2008, enabling direct analysis of how drug prosecution changed in response to sweeping policy change.",
-
-                                    br(),br(),
-                                    h4("Where can I get it?"),
-
-                                    "The data sourced for all visualizations on this site are available for download",
-                                      actionLink("link_to_download", "here (BROKEN)."),
-                           
-                                    
-                                    h3("Source Code"),
-                                    p("Interested programmers can view the source code for this app, written in R, on",
-                                      a("GitHub (BROKEN).", href="#")),
-                           br(),br()
-                           ),
-                           
-                           # Download data --------------------------------------------
-                           # tabPanel("Download the Data"#, 
-                                    # wellPanel(id="internal_well",
-                                    #           p("This page allows you to select a subset of the MassDOT data to download. If you required the entire raw 2.8 GB dataset, you can download a compressed version from Google Drive", 
-                                    #             a("here.", href="https://drive.google.com/file/d/1enQXDsXV7bVtrjiUteQ7g04vL1o-Sv7e/view?usp=sharing"), 
-                                    #             style="font-style: italic; text-align: center; font-weight: 100;"),
-                                    #   fluidRow(
-                                    #     column(4, selectizeInput("download_town", "Town/City", c("All cities and towns", all_towns))),
-                                    #     column(4, selectizeInput("download_agency", 
-                                    #                    label="Agency/Department", c("All agencies", all_agencies))),
-                                    #     column(4, div(id="custom_label_div",
-                                    #         tags$b("Officer ID"),
-                                    #         a(icon("info-circle"), id="officer_tooltip",
-                                    #           `data-toggle`="tooltip", title=officer_tooltip_html),
-                                    #         selectizeInput("download_officer", 
-                                    #                    label=NULL, 
-                                    #                    c("Loading, please wait..." = "")))
-                                    #     )),
-                                    #   splitLayout(
-                                    #     dateInput("download_start_date", "Start Date",
-                                    #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #     dateInput("download_end_date", "End Date",
-                                    #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #   actionButton("download_filters", "Apply Filters")
-                                    # ),
-                                    # 
-                                    # div(id="download_div",
-                                    #     withSpinner(textOutput("download_size", inline=T), type=4, color="#b5b5b5", size=0.5),
-                                    #   br(),
-                                    #   disabled(downloadButton("download_button", "Download"))
-                                    #   )
-                                    # ),
-                           
-                           "Explore the Data:",
-                           # Mapping stops --------------------------------------------
-                           # tabPanel("Mapping Stops"#, 
-                                    # wellPanel(id="internal_well",
-                                    #   splitLayout(
-                                    #     dateInput("town_start_date", "Start Date",
-                                    #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #     dateInput("town_end_date", "End Date",
-                                    #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #   splitLayout(
-                                    #     radioButtons("towns_radio", "Value Type", 
-                                    #                  choiceValues=c("Total stops", 
-                                    #                            "Stops per capita"),
-                                    #                  choiceNames=c("Total stops", 
-                                    #                                 "Stops per 1,000 population"),
-                                    #                  selected="Total stops", inline=F),
-                                    #     div(id="town_log_span",
-                                    #         div(tags$b("Numeric Scale")),
-                                    #          checkboxInput("town_log", 
-                                    #                        span("Plot logarithmic scale", 
-                                    #                             a(icon("info-circle"), 
-                                    #                               id="log_tooltip",
-                                    #                               `data-toggle`="tooltip", 
-                                    #                               title=log_tooltip_html)), 
-                                    #                        value=T)
-                                    #          )),
-                                    #   actionButton("map_stops_button", "Go")),
-                                    # withSpinner(leafletOutput("stops_by_town"), type=4, color="#b5b5b5", size=0.5)
-                                    # 
-                           # ),
-                           
-                           
-                           # Disposition ------------------------------------------
-                           tabPanel("Disposition", 
-                                    wellPanel(id="internal_well",
-                                              em("Explore the dispositions (outcomes) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
-                                      fluidRow(
-                                        splitLayout(
-                                          selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns)),
-                                          selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts))
-                                        ),
-                                        splitLayout(
-                                          selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts)),
-                                          selectizeInput("disp_charge", label="Charge", c("All charges", all_charges))
-                                        ),
-                                      splitLayout(
-                                          selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
-                                          numericInput("disp_start_year", "Start Year",
-                                                    value = "2000", min="2000", max="2018"),
-                                          numericInput("disp_end_year", "End Year",
-                                                       value = "2014", min="2000", max="2018")),
-                                    actionButton("disp_button", "Go"))
-                                    ),
-                                    h2(textOutput("disp_count_str"), align="center"),
-                                    p(textOutput("disp_str", inline=T), align="center"),
-                                    withSpinner(plotlyOutput("disposition"), type=4, color="#b5b5b5", size=0.5)
-                                    )#,
-                           
-                           # Stops by offense ------------------------------------------
-                           # tabPanel("Stops by offense"#, 
-                                    # wellPanel(id="internal_well",
-                                    #           fluidRow(
-                                    #             column(4, selectizeInput("offense_town", "Town/City", c("All cities and towns", all_towns))),
-                                    #             column(4, selectizeInput("offense_agency", 
-                                    #                            label="Agency/Department", c("All agencies", all_agencies))),
-                                    #             column(4, div(id="custom_label_div",
-                                    #                 tags$b("Officer ID"),
-                                    #                 a(icon("info-circle"), id="officer_tooltip",
-                                    #                   `data-toggle`="tooltip", title=officer_tooltip_html),
-                                    #                 selectizeInput("offense_officer", 
-                                    #                                label=NULL, 
-                                    #                                c("Loading, please wait..." = ""))))
-                                    #             ),
-                                    #           
-                                    #           splitLayout(
-                                    #             dateInput("offense_start_date", "Start Date",
-                                    #                       value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #             dateInput("offense_end_date", "End Date",
-                                    #                       value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #           actionButton("offense_button", "Go")),#style="text-align: center;"),
-                                    # withSpinner(plotlyOutput("offenses"), type=4, color="#b5b5b5", size=0.5)
-                           # ),
-                                    
-                           # Agencies ------------------------------------------
-                           # "Agency Lookup",
-                           # tabPanel("Agency Lookup"#, 
-                                    # wellPanel(id="internal_well",
-                                    #   selectizeInput("agency_agency", 
-                                    #                  label="Agency/Department", 
-                                    #                  c(all_agencies)),
-                                    #   splitLayout(
-                                    #     dateInput("agency_start_date", "Start Date",
-                                    #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #     dateInput("agency_end_date", "End Date",
-                                    #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #   actionButton("agency_button", "Go")),
-                                    # withSpinner(uiOutput("agency_dashboard"), type=4, color="#b5b5b5", size=0.5)
-                           # ),
-
-                           # TOWN LOOKUP ----------------------------------------------
-                           # "Town Lookup",
-                           
-                           # Town overview ----------------------------------------------
-                           # tabPanel("Town Lookup"#, 
-                                    # wellPanel(id="internal_well",
-                                    #           selectizeInput("townover_town", "Town/City", all_towns),
-                                    #           splitLayout(
-                                    #             dateInput("townover_start_date", "Start Date",
-                                    #                       value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #             dateInput("townover_end_date", "End Date",
-                                    #                       value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #           actionButton("townover_button", "Go")),
-                                    # withSpinner(uiOutput("townover_dashboard"), type=4, color="#b5b5b5", size=0.5)
-                                    # ),
-                           
-                           # Town stops by race ---------------------------------------
-                           # tabPanel("Race of Stops by Town"#, 
-                                    # wellPanel(id="internal_well",
-                                    #   splitLayout(
-                                    #     selectizeInput("town_town", "Town/City", all_towns),
-                                    #     selectizeInput("town_agency", 
-                                    #                    label="Agency/Department",
-                                    #                    choices=c("All agencies", all_agencies))
-                                    #   ),
-                                    #   splitLayout(
-                                    #     dateInput("town_race_start_date", "Start Date",
-                                    #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #     dateInput("town_race_end_date", "End Date",
-                                    #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #   actionButton("town_button", "Go")
-                                    # ),
-                                    # hidden(img(src="race_legend.png", id="town_race_legend")),
-                                    # withSpinner(plotlyOutput("town_demog"), type=4, color="#b5b5b5", size=0.5)
-                                    # ),
-
-                           # "Officer ID Lookup",
-                           # Officer stops by race ------------------------------------
-                           # tabPanel("Race of Stops by Officer"#, 
-                                    # wellPanel(id="internal_well",
-                                    #   splitLayout(
-                                    #     selectizeInput("officer_agency", 
-                                    #                    label="Agency / Department", all_agencies),
-                                    #     div(id="custom_label_div",
-                                    #         tags$b("Officer ID"),
-                                    #         a(icon("info-circle"), id="officer_tooltip",
-                                    #           `data-toggle`="tooltip", title=officer_tooltip_html),
-                                    #         selectizeInput("officer_officer", 
-                                    #                        label=NULL, 
-                                    #                        choices=c("Loading, please wait..." = "")))
-                                    #     ),
-                                    #   splitLayout(
-                                    #     dateInput("officer_race_start_date", "Start Date",
-                                    #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                                    #     dateInput("officer_race_end_date", "End Date",
-                                    #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                                    #   actionButton("officer_button", "Go")
-                                    # ),
-                                    # hidden(img(src="race_legend.png", id="officer_race_legend")),
-                                    # withSpinner(plotlyOutput("officer_demog"), type=4, color="#b5b5b5", size=0.5)
-                                    # )
-                                    # 
-                                    # 
-              )
-              # )
-          ),
-          
-          div(id="footer",
-              # hr(),
-              div(align="center",
-                  a(href="https://www.aclum.org/", target="_blank",
-                    img(src="Logo_CMYK_Massachusetts_Massachusetts.png", height="50px", 
-                        style="display: inline; margin: 10px;")),
-                  a(href="https://www.data.aclum.org/",  target="_blank",
-                    img(src="D4J-logo.png", height="50px", 
-                        style="display: inline; margin: 10px;"))),
-              p("Please contact data4justice@aclum.org with questions.", align="center", style="opacity: 0.6;"),
-              p("Icons by FontAwesome and", a("Flaticon", href="https://www.flaticon.com/free-icon/police_811976"), align="center", style="opacity: 0.6; margin-top: -10px; font-size: 1rem; margin-bottom: 0px")
-          )
-)
+    # # Add javascript for log tooltip
+    # tags$script(HTML('
+    #      $( document ).on("shiny:sessioninitialized", function(event) {
+    #           $(\'a[data-toggle="tooltip"]\').tooltip({
+    #               animated: "fade",
+    #               placement: "bottom",
+    #               html: true
+    #           });      
+    #      });'
+    # )),
+    
+    # App title
+    div(id="title",
+        titlePanel("Prosecuting Drugs in Massachusetts, 2003 - 2014")
+    ),
+    
+    div(navlistPanel(widths = c(3, 9), id="panels",
+    
+       # About ----------------------------------------------------
+       tabPanel("About", 
+                
+          h3("Explore the History of Drug Prosecution in Massachusetts"),
+          br(),
+          p("Explore the complete record of drug-related criminal charges filed between 2003 and 2014 and prosecuted under",
+            a("MGL Chapter 94C,", href="https://malegislature.gov/laws/generallaws/parti/titlexv/chapter94c"), 
+             "as documented in data obtained from the Massachusetts Trial Court."),
+       # 
+       # div(id="dev-wait",
+       #     wellPanel(
+       #       icon('exclamation-triangle'),
+       #       h4("Disclaimer"),
+       #       em("Based on discussions with MassDOT, ACLUM understands that MassDOT’s historical record of traffic stops can change due to updates in reporting requirements, corrections of records, delays by municipalities in reporting their warnings and citations, and other factors. Therefore, the record of traffic stops presented here reflects only the MassDOT database as it was on February 4, 2021.",)
+       #     )
+       # ),
+       
+       h3("About the Data"),
+       
+       h4("Where did the data come from?"),
+       "The data available here are the result of a 2017 lawsuit, brought in response to the misconduct of state drug-lab chemist Sonja Farak and subsequent mishandling by the Massachusetts Attorney General's Office:",
+        a(href="https://www.aclum.org/en/cases/committee-public-counsel-services-v-attorney-general",
+          em("Committee for Public Counsel Services (CPCS) v. Attorney General.")),
+       
+       "For more information about the drug scandal, see the",
+         a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information"), "or the", 
+         HTML("<a href='https://www.netflix.com/title/80233339'>Netflix documentary <i>How to Fix a Drug Scandal</i></a>."),
+       #          
+                br(),br(),
+                h4("What's included?"),
+                "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset includes information regarding the criminal statute under Chapter 94C applicable to each charge; the years of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
+                
+                br(),br(),
+                h4("What's not included?"),
+                "As required and verified by the Court, the data available here have been scrubbed of any personally identifiable information regarding the individuals involved in the criminal cases.",
+                
+                br(),br(),
+                h4("Why does it matter?"),
+                
+                "Not only did these data enable the dismissal of tens of thousands of cases in response to misconduct by the AGO and drug chemists",
+                  a(href="https://www.bostonglobe.com/metro/2019/09/25/charges-tossed-because-they-were-tainted-former-amherst-lab-chemist-misconduct/MUPgdHeLy8bdrzl5KGtvIN/story.html",
+                    target="_blank",
+                    "Sonja Farak"), "and",
+                a(href="https://www.npr.org/sections/thetwo-way/2017/04/20/524894955/massachusetts-throws-out-more-than-21-000-convictions-in-drug-testing-scandal", "Annie Dookhan;", target="_blank"),
+                "this dataset documents the intricacies of drug prosecution across Massachusetts for over a decade. Notably, the timeframe captured by the data includes Massachusetts'",
+                a("decriminalization", href="https://archive.boston.com/news/local/articles/2008/11/05/voters_approve_marijuana_law_change/", target="_blank"),
+                "of marijuana in 2008, enabling direct analysis of how drug prosecution changed in response to sweeping policy change.",
+    
+                br(),br(),
+                h4("Where can I get it?"),
+    
+                "The data sourced for all visualizations on this site are available for download",
+                  actionLink("link_to_download", "here (BROKEN)."),
+       
+                
+                h3("Source Code"),
+                p("Interested programmers can view the source code for this app, written in R, on",
+                  a("GitHub (BROKEN).", href="#")),
+       br(),br()
+       ),
+       
+       # Download data --------------------------------------------
+       # tabPanel("Download the Data"#, 
+                # wellPanel(id="internal_well",
+                #           p("This page allows you to select a subset of the MassDOT data to download. If you required the entire raw 2.8 GB dataset, you can download a compressed version from Google Drive", 
+                #             a("here.", href="https://drive.google.com/file/d/1enQXDsXV7bVtrjiUteQ7g04vL1o-Sv7e/view?usp=sharing"), 
+                #             style="font-style: italic; text-align: center; font-weight: 100;"),
+                #   fluidRow(
+                #     column(4, selectizeInput("download_town", "Town/City", c("All cities and towns", all_towns))),
+                #     column(4, selectizeInput("download_agency", 
+                #                    label="Agency/Department", c("All agencies", all_agencies))),
+                #     column(4, div(id="custom_label_div",
+                #         tags$b("Officer ID"),
+                #         a(icon("info-circle"), id="officer_tooltip",
+                #           `data-toggle`="tooltip", title=officer_tooltip_html),
+                #         selectizeInput("download_officer", 
+                #                    label=NULL, 
+                #                    c("Loading, please wait..." = "")))
+                #     )),
+                #   splitLayout(
+                #     dateInput("download_start_date", "Start Date",
+                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #     dateInput("download_end_date", "End Date",
+                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #   actionButton("download_filters", "Apply Filters")
+                # ),
+                # 
+                # div(id="download_div",
+                #     withSpinner(textOutput("download_size", inline=T), type=4, color="#b5b5b5", size=0.5),
+                #   br(),
+                #   disabled(downloadButton("download_button", "Download"))
+                #   )
+                # ),
+       
+       "Explore the Data:",
+       # Mapping stops --------------------------------------------
+       # tabPanel("Mapping Stops"#, 
+                # wellPanel(id="internal_well",
+                #   splitLayout(
+                #     dateInput("town_start_date", "Start Date",
+                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #     dateInput("town_end_date", "End Date",
+                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #   splitLayout(
+                #     radioButtons("towns_radio", "Value Type", 
+                #                  choiceValues=c("Total stops", 
+                #                            "Stops per capita"),
+                #                  choiceNames=c("Total stops", 
+                #                                 "Stops per 1,000 population"),
+                #                  selected="Total stops", inline=F),
+                #     div(id="town_log_span",
+                #         div(tags$b("Numeric Scale")),
+                #          checkboxInput("town_log", 
+                #                        span("Plot logarithmic scale", 
+                #                             a(icon("info-circle"), 
+                #                               id="log_tooltip",
+                #                               `data-toggle`="tooltip", 
+                #                               title=log_tooltip_html)), 
+                #                        value=T)
+                #          )),
+                #   actionButton("map_stops_button", "Go")),
+                # withSpinner(leafletOutput("stops_by_town"), type=4, color="#b5b5b5", size=0.5)
+                # 
+       # ),
+       
+       
+       # Disposition ------------------------------------------
+       tabPanel("Disposition", 
+                wellPanel(id="internal_well",
+                          em("Explore the dispositions (outcomes) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
+                  fluidRow(
+                    splitLayout(
+                      selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns)),
+                      selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts))
+                    ),
+                    splitLayout(
+                      selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts)),
+                      selectizeInput("disp_charge", label="Charge", c("All charges", all_charges))
+                    ),
+                  splitLayout(
+                      selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
+                      numericInput("disp_start_year", "Start Year",
+                                value = "2000", min="2000", max="2018"),
+                      numericInput("disp_end_year", "End Year",
+                                   value = "2014", min="2000", max="2018")),
+                actionButton("disp_button", "Go"))
+                ),
+                h2(textOutput("disp_count_str"), align="center"),
+                p(textOutput("disp_str", inline=T), align="center"),
+                withSpinner(plotlyOutput("disposition"), type=4, color="#b5b5b5", size=0.5)
+                ),
+       
+       # Charges over time ------------------------------------------
+       tabPanel("Compare charges over time", 
+                wellPanel(id="internal_well",
+                          
+                          em("Explore 94C charging trends over time. Filter the charges with the following criteria:"),
+                          fluidRow(
+                            splitLayout(
+                              selectizeInput("time_city", "Town/City", c("All cities and towns", all_towns)),
+                              selectizeInput("time_dept", label="Agency / Department", c("All departments", all_depts))
+                            ),
+                            splitLayout(
+                              selectizeInput("time_court", "Court", c("All courts"="All courts", all_courts)),
+                              selectizeInput("time_disp", label="Disposition", c("All dispositions", all_disps))
+                            ),
+                            selectizeInput("time_charge", label="Charge", c("All charges", all_charges))
+                          ),
+                          checkboxInput("compare_time", label="Select a second set of criteria to compare?", value=F),
+                          conditionalPanel(
+                            condition = "input.compare_time == true",
+                            fluidRow(
+                              splitLayout(
+                                selectizeInput("time_city2", "Town/City", c("All cities and towns", all_towns)),
+                                selectizeInput("time_dept2", label="Agency / Department", c("All departments", all_depts))
+                              ),
+                              splitLayout(
+                                selectizeInput("time_court2", "Court", c("All courts"="All courts", all_courts)),
+                                selectizeInput("time_disp2", label="Disposition", c("All dispositions", all_disps))
+                              ),
+                              selectizeInput("time_charge2", label="Charge", c("All charges", all_charges))
+                            )),
+                          actionButton("time_button", "Go")),
+                radioButtons("year_type", "Plot by year of:", choices=c("Arrest", "Disposition", "Filing", "Offense"), 
+                             selected="Filing", inline=T),
+                withSpinner(plotlyOutput("stops_v_time"), type=4, color="#b5b5b5", size=0.5)
+       )
+       
+       # Stops by offense ------------------------------------------
+       # tabPanel("Stops by offense"#, 
+                # wellPanel(id="internal_well",
+                #           fluidRow(
+                #             column(4, selectizeInput("offense_town", "Town/City", c("All cities and towns", all_towns))),
+                #             column(4, selectizeInput("offense_agency", 
+                #                            label="Agency/Department", c("All agencies", all_agencies))),
+                #             column(4, div(id="custom_label_div",
+                #                 tags$b("Officer ID"),
+                #                 a(icon("info-circle"), id="officer_tooltip",
+                #                   `data-toggle`="tooltip", title=officer_tooltip_html),
+                #                 selectizeInput("offense_officer", 
+                #                                label=NULL, 
+                #                                c("Loading, please wait..." = ""))))
+                #             ),
+                #           
+                #           splitLayout(
+                #             dateInput("offense_start_date", "Start Date",
+                #                       value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #             dateInput("offense_end_date", "End Date",
+                #                       value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #           actionButton("offense_button", "Go")),#style="text-align: center;"),
+                # withSpinner(plotlyOutput("offenses"), type=4, color="#b5b5b5", size=0.5)
+       # ),
+                
+       # Agencies ------------------------------------------
+       # "Agency Lookup",
+       # tabPanel("Agency Lookup"#, 
+                # wellPanel(id="internal_well",
+                #   selectizeInput("agency_agency", 
+                #                  label="Agency/Department", 
+                #                  c(all_agencies)),
+                #   splitLayout(
+                #     dateInput("agency_start_date", "Start Date",
+                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #     dateInput("agency_end_date", "End Date",
+                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #   actionButton("agency_button", "Go")),
+                # withSpinner(uiOutput("agency_dashboard"), type=4, color="#b5b5b5", size=0.5)
+       # ),
+    
+       # TOWN LOOKUP ----------------------------------------------
+       # "Town Lookup",
+       
+       # Town overview ----------------------------------------------
+       # tabPanel("Town Lookup"#, 
+                # wellPanel(id="internal_well",
+                #           selectizeInput("townover_town", "Town/City", all_towns),
+                #           splitLayout(
+                #             dateInput("townover_start_date", "Start Date",
+                #                       value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #             dateInput("townover_end_date", "End Date",
+                #                       value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #           actionButton("townover_button", "Go")),
+                # withSpinner(uiOutput("townover_dashboard"), type=4, color="#b5b5b5", size=0.5)
+                # ),
+       
+       # Town stops by race ---------------------------------------
+       # tabPanel("Race of Stops by Town"#, 
+                # wellPanel(id="internal_well",
+                #   splitLayout(
+                #     selectizeInput("town_town", "Town/City", all_towns),
+                #     selectizeInput("town_agency", 
+                #                    label="Agency/Department",
+                #                    choices=c("All agencies", all_agencies))
+                #   ),
+                #   splitLayout(
+                #     dateInput("town_race_start_date", "Start Date",
+                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #     dateInput("town_race_end_date", "End Date",
+                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #   actionButton("town_button", "Go")
+                # ),
+                # hidden(img(src="race_legend.png", id="town_race_legend")),
+                # withSpinner(plotlyOutput("town_demog"), type=4, color="#b5b5b5", size=0.5)
+                # ),
+    
+       # "Officer ID Lookup",
+       # Officer stops by race ------------------------------------
+       # tabPanel("Race of Stops by Officer"#, 
+                # wellPanel(id="internal_well",
+                #   splitLayout(
+                #     selectizeInput("officer_agency", 
+                #                    label="Agency / Department", all_agencies),
+                #     div(id="custom_label_div",
+                #         tags$b("Officer ID"),
+                #         a(icon("info-circle"), id="officer_tooltip",
+                #           `data-toggle`="tooltip", title=officer_tooltip_html),
+                #         selectizeInput("officer_officer", 
+                #                        label=NULL, 
+                #                        choices=c("Loading, please wait..." = "")))
+                #     ),
+                #   splitLayout(
+                #     dateInput("officer_race_start_date", "Start Date",
+                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
+                #     dateInput("officer_race_end_date", "End Date",
+                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
+                #   actionButton("officer_button", "Go")
+                # ),
+                # hidden(img(src="race_legend.png", id="officer_race_legend")),
+                # withSpinner(plotlyOutput("officer_demog"), type=4, color="#b5b5b5", size=0.5)
+                # )
+                # 
+                # 
+        )
+        # )
+    ),
+    
+    div(id="footer",
+        # hr(),
+        div(align="center",
+            a(href="https://www.aclum.org/", target="_blank",
+              img(src="Logo_CMYK_Massachusetts_Massachusetts.png", height="50px", 
+                  style="display: inline; margin: 10px;")),
+            a(href="https://www.data.aclum.org/",  target="_blank",
+              img(src="D4J-logo.png", height="50px", 
+                  style="display: inline; margin: 10px;"))),
+        p("Please contact data4justice@aclum.org with questions.", align="center", style="opacity: 0.6;"),
+        p("Icons by FontAwesome and", a("Flaticon", href="https://www.flaticon.com/free-icon/police_811976"), align="center", style="opacity: 0.6; margin-top: -10px; font-size: 1rem; margin-bottom: 0px")
+    )
+  )
