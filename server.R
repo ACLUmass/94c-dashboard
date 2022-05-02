@@ -483,7 +483,8 @@ function(input, output, session) {
                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                      showlegend = TRUE,
                      font=list(family = "GT America"),
-                     hoverlabel=list(font = list(family = "GT America")))
+                     hoverlabel=list(font = list(family = "GT America")),
+                     legend = list(x = 100, y = 0.5))
           
         } else {
             # If there are no stops for the filter

@@ -236,15 +236,6 @@ fluidPage(
                                           selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts)),
                                           selectizeInput("disp_charge", label="Charge", c("All charges", all_charges))
                                         ),
-
-                                        # column(6, splitLayout(
-                                        #   div(id="custom_label_div",
-                                        #     tags$b("Officer ID"),
-                                        #     a(icon("info-circle"), id="officer_tooltip",
-                                        #       `data-toggle`="tooltip", title=officer_tooltip_html),
-                                        #     selectizeInput("time_officer",
-                                        #                    label=NULL,
-                                        #                    c("Loading, please wait..." = ""))),
                                       splitLayout(
                                           selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
                                           numericInput("disp_start_year", "Start Year",
