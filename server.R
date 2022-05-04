@@ -15,7 +15,7 @@ library(sf)
 # Load data with fread
 charge_cats_df <- read_csv("data/94c_charge_codes.csv")
 disp_cats_df <- read_csv("data/94c_dispositions.csv")
-disp_colors <- readRDS("data/disp_colors.RDS")
+disp_colors <- readRDS("data/disp_colors.rds")
 ma_towns <- read_rds("data/ma_towns.rds")
 
 combined94c_data <- fread("94c_combined.csv") %>%
