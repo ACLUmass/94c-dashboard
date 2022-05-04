@@ -206,9 +206,9 @@ fluidPage(
             wellPanel(id="internal_well",
                       selectizeInput("DA_county", "District", choices=all_DAs),
                         numericInput("DA_start_year", "Start Year",
-                                     value = "2000", min="2000", max="2018"),
+                                     value = "2003", min="2003", max="2014"),
                         numericInput("DA_end_year", "End Year",
-                                     value = "2014", min="2000", max="2018"))),
+                                     value = "2014", min="2003", max="2014"))),
                       # actionButton("DA_button", "Go"))),
             column(6, withSpinner(leafletOutput("DA_map"), type=4, color="#b5b5b5", size=0.5))),
           withSpinner(uiOutput("DA_dashboard"), type=4, color="#b5b5b5", size=0.5)

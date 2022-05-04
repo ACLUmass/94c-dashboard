@@ -17,6 +17,7 @@ charge_cats_df <- read_csv("data/94c_charge_codes.csv")
 disp_cats_df <- read_csv("data/94c_dispositions.csv")
 disp_colors <- readRDS("data/disp_colors.rds")
 ma_towns <- read_rds("data/ma_towns.rds")
+DAs <- read_csv("data/DAs.csv")
 
 combined94c_data <- fread("94c_combined.csv") %>%
   merge(charge_cats_df, by="charge") %>%
@@ -382,7 +383,19 @@ function(input, output, session) {
         DA_data <- DA_data[county == DA_values$DA_cty & 
                              file_year <= DA_values$end_year & 
                              file_year >= DA_values$start_year]
-
+        
+        DA_names <- DAs %>%
+          filter(District == DA_values$DA_cty) %>%
+          filter((Left_num >= input$DA_end_year & Elected <= input$DA_end_year) |
+                   (Elected <= input$DA_start_year & Left_num >= input$DA_start_year) |
+                   (Elected >= input$DA_start_year & Left_num <= input$DA_end_year)) %>%
+          arrange(Left_num) %>%
+          mutate(string = paste0(Name, " (", Elected, "-", Left, ")")) %>%
+          pull(string)
+        
+        n_DAs <- length(DA_names)
+        DA_name_str <- paste(DA_names, collapse = ", ")
+          
         # Calculate total stops
         DA_values$total_charges <- DA_data %>%
             count(name="N") %>%
@@ -460,9 +473,11 @@ function(input, output, session) {
             h1(number(DA_values$total_charges, big.mark=","),
                style="text-align: center;  display: inline;"),
             p(em("94C charges filed in", DA_values$DA_cty, "District", br(), "between",
-                 DA_values$start_year, "and",
-                 DA_values$end_year),
-              style="text-align: center; display: inline;")),
+                 input$DA_start_year, "and",
+                 input$DA_end_year, style="text-align: center; display: inline;")), 
+                 hr(style="border: grey solid .5px;margin-top: 0rem; margin-bottom: 1rem;"),
+                 em(paste0("District Attorney", if_else(n_DAs > 1, "s: ", ": "), DA_name_str),
+              style="text-align: center; display: inline-block; margin-bottom: 1rem;")),
             splitLayout(id="dashboard_split",
                         div(h3(number(scandal_charges, big.mark=","), style="margin:0px;"), 
                                h4("charges dismissed due to"), br(), h4(paste("lab scandal in", 
