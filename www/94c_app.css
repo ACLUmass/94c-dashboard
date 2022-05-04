@@ -35,10 +35,22 @@ Thank you: https://shiny.rstudio.com/articles/css.html
   font-weight:600;
 }
 
+body, html {
+  height: 100%;
+}
+
 
 body {
   font-family: 'gtam', sans-serif;
   margin-right: 5%;
+}
+
+.row {
+  display: flex;
+}
+
+.well .row {
+  display: inherit;
 }
 
 #title {
@@ -325,3 +337,49 @@ div[data-value="Compare stops over time"] label span {
   display: inline;
   margin-left: 1rem;
 }
+
+#DA_map {
+  height: 300px !important;
+}
+
+#DA_start_year, #DA_end_year {
+  margin-bottom: 10px;
+}
+
+#DA_control .well {
+  display: flex;
+  align-items: center;
+  height: 270px;
+  flex-direction: column;
+  width:100%;
+}
+
+#DA_control .well .form-group { 
+  width: 100%;
+}
+
+#DA_control .row {
+  align-items: center;
+}
+
+#DA_numbers {
+    background-color: #a7d7b554;
+    height: 100%;
+    display: inline-block;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    margin-bottom: 1rem;
+}
+
+#DA_numbers h1 {
+  display: inline-block !important;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+#DA_numbers p {
+  text-align: left !important;
+  display: inline-block !important;
+  margin-left: 1.5rem;
+}
+

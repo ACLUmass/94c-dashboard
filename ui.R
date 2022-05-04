@@ -21,6 +21,11 @@ all_courts <- combined94c_data[order(court), court] %>%
 all_charges <- charge_cats$charge_cat
 all_disps <- readRDS("data/disp_colors.rds") %>% names()
 
+# Define list of counties
+all_DAs <- c("Berkshire", "Bristol", "Cape and Islands", "Essex", 
+             "Hampden", "Middlesex", "Norfolk", "Northwestern",
+              "Plymouth", "Suffolk", "Worcester")
+
 # Rename courts to be more accessible
 court_names <- data.frame(all_courts) %>%
   rename(court = all_courts) %>%
@@ -193,7 +198,23 @@ fluidPage(
        
        "Explore the Data:",
        
-       # Mapping charges --------------------------------------------
+       # District Attorneys -----------------------------------------------------------
+       
+       tabPanel("District Attorney Lookup", 
+          fluidRow(id="DA_control",
+            column(6, style="display: flex; align-items: center;",
+            wellPanel(id="internal_well",
+                      selectizeInput("DA_county", "District", choices=all_DAs),
+                        numericInput("DA_start_year", "Start Year",
+                                     value = "2000", min="2000", max="2018"),
+                        numericInput("DA_end_year", "End Year",
+                                     value = "2014", min="2000", max="2018"))),
+                      # actionButton("DA_button", "Go"))),
+            column(6, withSpinner(leafletOutput("DA_map"), type=4, color="#b5b5b5", size=0.5))),
+          withSpinner(uiOutput("DA_dashboard"), type=4, color="#b5b5b5", size=0.5)
+          ),
+       
+       # Mapping charges --------------------------------------------------------------
        tabPanel("Mapping Charges",
           wellPanel(id="internal_well",
              em("Explore the 94C charges across Massachusetts. Filter the charges with the following criteria:"),

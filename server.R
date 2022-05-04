@@ -3,7 +3,7 @@ library(shiny)
 library(plotly)
 # library(fst)
 library(data.table)
-# library(leaflet)
+library(leaflet)
 library(lubridate)
 library(scales)
 # library(shinyjs)
@@ -21,6 +21,23 @@ ma_towns <- read_rds("data/ma_towns.rds")
 combined94c_data <- fread("94c_combined.csv") %>%
   merge(charge_cats_df, by="charge") %>%
   merge(disp_cats_df, by="disposition")
+
+mass_cntys <- tigris::counties(state=25, cb=T)
+mass_DA_dists <- mass_cntys %>%
+  mutate(district = case_when(
+    NAME %in% c("Hampshire", "Franklin") ~ "Northwestern",
+    NAME %in% c("Dukes", "Barnstable", "Nantucket") ~ "Cape and Islands",
+    T ~ NAME
+  )) %>%
+  group_by(district) %>%
+  summarise(geometry = sf::st_union(geometry)) %>%
+  ungroup() %>%
+  sf::st_transform('+proj=longlat +datum=WGS84')
+
+# Define list of counties
+all_DAs <- c("Berkshire", "Bristol", "Cape and Islands", "Essex", 
+             "Hampden", "Middlesex", "Norfolk", "Northwestern",
+             "Plymouth", "Suffolk", "Worcester")
 
 # Further condense disposition categories
 combined94c_data <- combined94c_data %>% 
@@ -313,6 +330,156 @@ function(input, output, session) {
 #         }
 #     )
 #     
+    # District Attorneys ----------------------------------------------------------
+    DA_values <- reactiveValues(done = NULL)
+    
+    DA_data <- combined94c_data %>%
+      mutate(county = case_when(
+        county %in% c("Hampshire", "Franklin") ~ "Northwestern",
+        county %in% c("Dukes", "Barnstable", "Nantucket") ~ "Cape and Islands",
+        T ~ county
+      ))
+    
+    # Plot the county 
+    output$DA_map <- renderLeaflet({
+      map_data <- mass_DA_dists %>%
+        mutate(is_our_county = district == input$DA_county)
+      
+      pal <- colorNumeric(
+        palette = c("grey", "#00343a"),
+        domain = 0:1,
+        na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
+      )
+      
+      leaflet(options = leafletOptions(attributionControl = T)) %>%
+        addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+        addPolygons(data = map_data,
+                    fillOpacity = 0.7,
+                    weight = 1,
+                    fillColor = ~pal(is_our_county),
+                    color="grey",
+                    stroke=T,
+                    smoothFactor=.5,
+                    label = ~lapply(paste0("<b>", district, " District</b></br>"),
+                                    htmltools::HTML),
+                    group="poly")  %>%
+        addEasyButton(easyButton(
+          icon="fa-home", title="Reset",
+          onClick=JS("function(btn, map){
+                   var groupLayer = map.layerManager.getLayerGroup('poly');
+                   map.fitBounds(groupLayer.getBounds());
+               }"))) %>%
+        addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>",
+                   "bottomleft", className="logo-control")
+    })
+
+    output$DA_dashboard <- renderUI({
+      
+        DA_values$DA_cty <- input$DA_county
+        DA_values$start_year <- input$DA_start_year
+        DA_values$end_year <- input$DA_end_year
+        
+        DA_data <- DA_data[county == DA_values$DA_cty & 
+                             file_year <= DA_values$end_year & 
+                             file_year >= DA_values$start_year]
+
+        # Calculate total stops
+        DA_values$total_charges <- DA_data %>%
+            count(name="N") %>%
+            pull(1)
+        
+        scandal_charges <- DA_data %>%
+          mutate(in_scandal = disposition_cat == "Dismissed (Lab Misconduct)") %>%
+          filter(in_scandal) %>%
+          count(name="N") %>%
+          pull(1)
+        
+        # Percent implicated in scandal
+        output$DA_pie <- renderPlotly({
+          
+          DA_data %>%
+            mutate(in_scandal = disposition_cat == "Dismissed (Lab Misconduct)") %>%
+            count(in_scandal, name="N") %>%
+            arrange(in_scandal) %>%
+            plot_ly(sort=F,
+                    direction = "clockwise",
+                    marker = list(line = list(color = 'lightgrey', width = 1),
+                                  colors=c("black", "#a7d7b5")),
+                    labels = ~in_scandal, values = ~N,
+                    textposition = "inside") %>%
+            add_pie(hovertemplate = '%{value} charges (%{percent})<extra></extra>') %>%
+            layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                   yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                   showlegend = F,
+                   margin = list(l = 20, r = 20),
+                   font=list(family = "GT America"),
+                   hoverlabel=list(font = list(family = "GT America")),
+                   legend = list(x = 100, y = 0.5))
+        })
+
+        # Top agencies
+        output$DA_top_agencies <- renderTable({
+
+            DA_data %>%
+                filter(!is.na(department)) %>%
+                count(department, name="N") %>%
+                slice_max(N, n=10) %>%
+                mutate(Rank = min_rank(-N),
+                       N = number(N, big.mark=",", accuracy=1)) %>%
+                head(10) %>%
+                select(Rank, `Agency` = department, `Charges filed`=N)
+        })
+
+        # Top courts
+        output$DA_top_courts <- renderTable({
+
+            DA_data %>%
+                filter(!is.na(court)) %>%
+                mutate(court_name = names(all_courts[match(court, all_courts)])) %>%
+                count(court_name, name="N") %>%
+                slice_max(N, n=10) %>%
+                mutate(Rank = min_rank(-N),
+                       N = number(N, big.mark=",", accuracy=1)) %>%
+                head(10) %>%
+                select(Rank, `Court` = court_name, `Number of Charges`=N)
+        })
+
+        # Top charges
+        output$DA_top_charges <- renderTable({
+
+            DA_data %>%
+                count(charge_cat, name="N") %>%
+                slice_max(N, n=10) %>%
+                mutate(N = number(N, big.mark=",", accuracy=1)) %>%
+                rename(`Number of Charges` = N, `Charge Type` = charge_cat)
+
+        })
+
+        tagList(
+          div(id="DA_numbers",
+            h1(number(DA_values$total_charges, big.mark=","),
+               style="text-align: center;  display: inline;"),
+            p(em("94C charges filed in", DA_values$DA_cty, "District", br(), "between",
+                 DA_values$start_year, "and",
+                 DA_values$end_year),
+              style="text-align: center; display: inline;")),
+            splitLayout(id="dashboard_split",
+                        div(h3(number(scandal_charges, big.mark=","), style="margin:0px;"), 
+                               h4("charges dismissed due to"), br(), h4(paste("lab scandal in", 
+                                 DA_values$DA_cty, "county")),
+                        plotlyOutput("DA_pie", height="300px")),
+                div(h4("Top Agencies"),
+                    tableOutput("DA_top_agencies"))
+            ),
+            splitLayout(id="dashboard_split",
+                div(h4("Top Courts"),
+                    tableOutput("DA_top_courts")),
+                div(h4("Most Common Charges"),
+                    tableOutput("DA_top_charges")
+            ))
+        )
+    })
+
     # Mapping stops -------------------------------------------------------------------
 
     charges_map <- reactiveValues(data=NULL)
@@ -372,7 +539,7 @@ function(input, output, session) {
             select(-TOWN, town=jurisdiction) %>%
             st_as_sf() %>%
             st_transform('+proj=longlat +datum=WGS84')
-
+        
         if (input$map_radio == "Charges per capita") {
           charges_sf <- charges_sf %>%
                 mutate(N = (N / pop) * 1e3)
@@ -435,7 +602,7 @@ function(input, output, session) {
         one_town <- charges_map$data %>%
           filter(N != 0) %>%
           nrow() == 1
-        
+          
         leaflet(options = leafletOptions(attributionControl = T)) %>%
             addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
             addPolygons(data = charges_map$data,
@@ -509,14 +676,12 @@ function(input, output, session) {
         disp_values$disp_yr_type <- input$disp_yr_type
         disp_values$start_yr <- input$disp_start_year
         disp_values$end_yr <- input$disp_end_year
-        # disp_values$data <- combined94c_data
-        
+
         results <- filter_and_get_label(
           combined94c_data, town = disp_values$town,
           agency = disp_values$agency,
           crt = disp_values$court,
           chrg = disp_values$charge,
-          # disp = "All dispositions",
           year_type = disp_values$disp_yr_type,
           start_year=disp_values$start_yr,
           end_year=disp_values$end_yr)
