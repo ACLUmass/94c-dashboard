@@ -341,16 +341,17 @@ function(input, output, session) {
         T ~ county
       ))
     
+    pal <- colorNumeric(
+      palette = c("grey", "#00343a"),
+      domain = 0:1,
+      na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
+    )
+    
     # Plot the county 
     output$DA_map <- renderLeaflet({
+      
       map_data <- mass_DA_dists %>%
         mutate(is_our_county = district == input$DA_county)
-      
-      pal <- colorNumeric(
-        palette = c("grey", "#00343a"),
-        domain = 0:1,
-        na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
-      )
       
       leaflet(options = leafletOptions(attributionControl = T)) %>%
         addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
@@ -372,6 +373,23 @@ function(input, output, session) {
                }"))) %>%
         addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>",
                    "bottomleft", className="logo-control")
+    })
+    
+    # Change county on click
+    observeEvent(input$DA_map_shape_click, {
+      # Get lat & lng of click
+      p <- input$DA_map_shape_click
+      
+      # Convert to sf
+      pt <- data.frame(longitude = p$lng, latitude = p$lat) %>%
+        st_as_sf(coords = c("longitude", "latitude"), crs=4326) 
+      
+      # Determine which county it was in
+      selected_cty <- st_join(pt, mass_DA_dists, join = st_intersects)$district
+      
+      # Update county
+      updateSelectInput(session, "DA_county", selected = selected_cty)
+      
     })
 
     output$DA_dashboard <- renderUI({

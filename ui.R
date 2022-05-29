@@ -210,7 +210,9 @@ fluidPage(
                         numericInput("DA_end_year", "End Year",
                                      value = "2014", min="2003", max="2014"))),
                       # actionButton("DA_button", "Go"))),
-            column(6, withSpinner(leafletOutput("DA_map"), type=4, color="#b5b5b5", size=0.5))),
+            column(6, withSpinner(div(leafletOutput("DA_map"), 
+                                      em("Click to select county."), style="text-align: center;"), 
+                                  type=4, color="#b5b5b5", size=0.5))),
           withSpinner(uiOutput("DA_dashboard"), type=4, color="#b5b5b5", size=0.5)
           ),
        
