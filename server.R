@@ -380,7 +380,7 @@ function(input, output, session) {
         DA_values$start_year <- input$DA_start_year
         DA_values$end_year <- input$DA_end_year
         
-        DA_data <- DA_data[county == DA_values$DA_cty & 
+        DA_data <- DA_data[county == input$DA_county & 
                              file_year <= DA_values$end_year & 
                              file_year >= DA_values$start_year]
         
