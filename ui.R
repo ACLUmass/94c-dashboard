@@ -153,7 +153,7 @@ fluidPage(
                 h4("Where can I get it?"),
     
                 "The data sourced for all visualizations on this site are available for download",
-                  actionLink("link_to_download", "here (BROKEN)."),
+                  actionLink("link_to_download", "here."),
        
                 
                 h3("Source Code"),
@@ -163,37 +163,14 @@ fluidPage(
        ),
        
        # Download data --------------------------------------------
-       # tabPanel("Download the Data"#, 
-                # wellPanel(id="internal_well",
-                #           p("This page allows you to select a subset of the MassDOT data to download. If you required the entire raw 2.8 GB dataset, you can download a compressed version from Google Drive", 
-                #             a("here.", href="https://drive.google.com/file/d/1enQXDsXV7bVtrjiUteQ7g04vL1o-Sv7e/view?usp=sharing"), 
-                #             style="font-style: italic; text-align: center; font-weight: 100;"),
-                #   fluidRow(
-                #     column(4, selectizeInput("download_town", "Town/City", c("All cities and towns", all_towns))),
-                #     column(4, selectizeInput("download_agency", 
-                #                    label="Agency/Department", c("All agencies", all_agencies))),
-                #     column(4, div(id="custom_label_div",
-                #         tags$b("Officer ID"),
-                #         a(icon("info-circle"), id="officer_tooltip",
-                #           `data-toggle`="tooltip", title=officer_tooltip_html),
-                #         selectizeInput("download_officer", 
-                #                    label=NULL, 
-                #                    c("Loading, please wait..." = "")))
-                #     )),
-                #   splitLayout(
-                #     dateInput("download_start_date", "Start Date",
-                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #     dateInput("download_end_date", "End Date",
-                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #   actionButton("download_filters", "Apply Filters")
-                # ),
-                # 
-                # div(id="download_div",
-                #     withSpinner(textOutput("download_size", inline=T), type=4, color="#b5b5b5", size=0.5),
-                #   br(),
-                #   disabled(downloadButton("download_button", "Download"))
-                #   )
-                # ),
+       tabPanel("Download the Data",
+                 p("You may download a CSV of the full Massachusetts Trial Court dataset, as provided to the parties in", 
+                   em("Committee for Public Counsel Services (CPCS) v. Attorney General"), 
+                   "but scrubbed of personally identifiable information, here:",
+                   style="text-align: center"),
+                downloadButton("download_button", "Download", style="margin-left: auto; margin-right: auto; display: grid; width: 100px;"),
+                div(em("File size: 166 MB"), style="text-align: center; margin-top: 1rem")
+       ),
        
        "Explore the Data:",
        

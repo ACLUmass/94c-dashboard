@@ -20,7 +20,9 @@ ma_towns <- read_rds("data/ma_towns.rds")
 DAs <- read_csv("data/DAs.csv")
 
 # Load data
-combined94c_data <- fread("94c_combined.csv") %>%
+combined94c_data_raw <- fread("94c_combined.csv") 
+
+combined94c_data <- combined94c_data_raw %>%
   merge(charge_cats_df, by="charge") %>%
   merge(disp_cats_df, by="disposition")
 
@@ -265,96 +267,23 @@ function(input, output, session) {
 #         
 #     }
 #     
-#     # Download data subset ------------------------------------------------------------
-#     
-#     # Link to this page from landing page
-#     observeEvent(input$link_to_download, {
-#         updateTabsetPanel(session, "panels", "Download the Data")
-#     })
-#     
-#     # Update the list of officers based on the selected agency
-#     observeEvent(input$download_agency, {
-#         
-#         if (input$download_agency == 'All agencies') {
-#             updateSelectizeInput(session, "download_officer",
-#                                  choices = c("Please select agency"=""), server=T)
-#         } else {
-#             
-#             selected_officers <- officers_per_agency[agency == input$download_agency, 
-#                                                      list(officer)]
-#     
-#             updateSelectizeInput(session, "download_officer",
-#                                  choices = c("All officers", selected_officers), server=T)
-#         }
-#     })
-#     
-#     download_values <- reactiveValues(agency = NULL)
-#     
-#     observeEvent(input$download_filters, {
-#         download_values$officer <-      input$download_officer
-#         download_values$town <-         input$download_town
-#         download_values$agency <-       input$download_agency
-#         download_values$start_date <-   input$download_start_date
-#         download_values$end_date <-     input$download_end_date
-#         
-#     })
-#     
-#     output$download_size <- renderText({
-#         validate(
-#             need(download_values$agency, 'Please select filters and press "Go" to view estimated download size.')
-#         )
-#         
-#         if (download_values$town == "All cities and towns" & 
-#             download_values$agency == "All agencies"  &
-#             (download_values$officer != "All officers" |
-#              download_values$officer != "") &
-#             download_values$end_date - download_values$start_date > years(2)) {
-#             
-#             cat("no!!!\n")
-#             disable("download_button")
-#             download_values$filtered <- F
-#             
-#             
-#             validate(need(download_values$filtered, "For a manageable download, please either select a single town, agency, or officer ID; or restrict the date range to less than two years."))
-#             
-#         } else {
-#             
-#             download_values$filtered <- T
-#             cat("applying data filters\n")
-#             
-#             q <- build_query(start_date = download_values$start_date, 
-#                              end_date = download_values$end_date, 
-#                              town = download_values$town, 
-#                              agency = download_values$agency, 
-#                              officer = download_values$officer)
-#             
-#             download_values$data <- 
-#                 dbGetQuery(sqldb, q) %>%
-#                 mutate(date = as_date(date))
-#             
-#             validate(
-#                 need(nrow(download_values$data) > 0, 
-#                      "No data for selected filters. Please try a different selection.")
-#             )
-#             
-#             enable("download_button")
-#         }
-#         
-#         object.size(download_values$data) %>% 
-#             format(units="auto", standard="SI") %>%
-#             paste("The dataset with the applied filters is estimated to be", .)
-#     })
-#     
-#     output$download_button <- downloadHandler(
-#         filename = "MassDOT_stops.csv",
-#         content = function(file) {
-#             cat("Download commencing!!\n")
-#             withProgress(message = 'Downloading...', value = 1, {
-#                 write_csv(download_values$data, file)
-#             })
-#         }
-#     )
-#     
+    # Download data subset ------------------------------------------------------------
+
+    # Link to this page from landing page
+    observeEvent(input$link_to_download, {
+        updateTabsetPanel(session, "panels", "Download the Data")
+    })
+    
+    output$download_button <- downloadHandler(
+        filename = "94C_charges_MassachusettsTrialCourt_2003_2014.csv",
+        content = function(file) {
+            cat("Download commencing!\n")
+            withProgress(message = 'Downloading...', value = 1, {
+                write_csv(combined94c_data_raw, file)
+            })
+        }
+    )
+
     # District Attorneys ----------------------------------------------------------
     DA_values <- reactiveValues(done = NULL)
     
