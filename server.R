@@ -19,9 +19,33 @@ disp_colors <- readRDS("data/disp_colors.rds")
 ma_towns <- read_rds("data/ma_towns.rds")
 DAs <- read_csv("data/DAs.csv")
 
+# Load data
 combined94c_data <- fread("94c_combined.csv") %>%
   merge(charge_cats_df, by="charge") %>%
   merge(disp_cats_df, by="disposition")
+
+# Standardize departments
+combined94c_data <- combined94c_data %>%
+  mutate(department = case_when(
+    str_detect(department, "^Sp |State Police") ~ "Massachusetts State Police",
+    str_detect(department, "Israel| Med |Medical|Med$|Health|Hosp") ~ "Hospital Police",
+    str_detect(department, "Coll|Campus|Univ|Community|Comm |U Mass|Wpi|Tech|Insti|Western") ~ "College or University Police",
+    str_detect(department, " Da") ~ "District Attorney",
+    str_detect(department, "Mbta") ~ "MBTA Police",
+    str_detect(department, "House|Hoc|Hous$|Jail") ~ "County Jail Police",
+    str_detect(department, "Mci|Doc|Corr") ~ "Prison Police",
+    str_detect(department, "Boston P.d.|Boston Pd") ~ "Boston PD",
+    str_detect(department, "^E ") ~ paste(str_replace(department, "E ", "East "), "PD"),
+    str_detect(department, "Cnty") ~ str_replace(department, "Cnty.*", "County Sheriff"),
+    str_detect(department, "y Sheri") ~ str_replace(department, "Sheri.*", "Sheriff"),
+    str_detect(department, "Sheriff") ~ str_replace(department, "Sheriff.*", "County Sheriff"),
+    str_detect(department, " Rr|^Bos$|Bureau|^Do Not Use$|Post|Env|Massport|Munic|Inve|Pub|Housing") ~ "Other",
+    str_detect(department, "Police") ~ str_replace(department, "Police", "PD"),
+    str_detect(department, "Brookfield Pd") ~ "Brookfield PD",
+    str_detect(department, "Hampshire County") ~ "Hampshire County Sheriff",
+    is.na(department) ~ "Other",
+    T ~ paste(department, "PD")
+  ))
 
 mass_cntys <- tigris::counties(state=25, cb=T)
 mass_DA_dists <- mass_cntys %>%

@@ -14,8 +14,7 @@ disp_cats <- read_csv("data/94c_dispositions.csv")
 
 all_towns <- combined94c_data[order(jurisdiction), jurisdiction] %>%
   unique()
-all_depts <- combined94c_data[order(department), department] %>%
-  unique()
+all_depts <- read_rds("data/all_depts.rds")
 all_courts <- combined94c_data[order(court), court] %>%
   unique()
 all_charges <- charge_cats$charge_cat
