@@ -26,7 +26,7 @@ combined94c_data <- combined94c_data_raw %>%
   merge(charge_cats_df, by="charge") %>%
   merge(disp_cats_df, by="disposition")
 
-# Standardize departments
+# Standardize departments and jurisdictions
 combined94c_data <- combined94c_data %>%
   mutate(department = case_when(
     str_detect(department, "^Sp |State Police") ~ "Massachusetts State Police",
@@ -47,6 +47,11 @@ combined94c_data <- combined94c_data %>%
     str_detect(department, "Hampshire County") ~ "Hampshire County Sheriff",
     is.na(department) ~ "Other",
     T ~ paste(department, "PD")
+  ),
+  jurisdiction = case_when(
+    jurisdiction == "(DO NOT USE) Middleton" ~ "Middleton",
+    is.na(jurisdiction) ~ "Not Listed",
+    T ~ jurisdiction
   ))
 
 mass_cntys <- tigris::counties(state=25, cb=T)
@@ -136,7 +141,11 @@ function(input, output, session) {
       
       if(town != "All cities and towns") {
         data <- data[jurisdiction == town]
+        if (town != "Not Listed") {
         town_str <- paste("in", town)
+        } else {
+          town_str <- "without reporting town/city"
+        }
       }
       
       if(agency != "All departments") {
