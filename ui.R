@@ -313,7 +313,39 @@ fluidPage(
                 radioButtons("year_type", "Plot by year of:", choices=c("Arrest", "Disposition", "Filing", "Offense"), 
                              selected="Filing", inline=T),
                 withSpinner(plotlyOutput("stops_v_time"), type=4, color="#b5b5b5", size=0.5)
+       ),
+       
+       # Demographics  ------------------------------------------
+       tabPanel("Demographics", 
+                wellPanel(id="internal_well",
+                          em("Explore the demographics of individuals charged under Chapter 94C in Massachusetts. Filter with the following criteria:"),
+                          fluidRow(
+                            splitLayout(
+                              selectizeInput("dem_city", "Town/City", c("All cities and towns", all_towns)),
+                              selectizeInput("dem_dept", label="Agency / Department", c("All departments", all_depts))
+                            ),
+                            splitLayout(
+                              selectizeInput("dem_court", "Court", c("All courts"="All courts", all_courts)),
+                              selectizeInput("dem_charge", label="Charge", c("All charges", all_charges)),
+                              selectizeInput("dem_disp", label="Disposition", c("All dispositions", all_disps))
+                            ),
+                            splitLayout(
+                              selectizeInput("dem_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
+                              numericInput("dem_start_year", "Start Year",
+                                           value = "2000", min="2000", max="2018"),
+                              numericInput("dem_end_year", "End Year",
+                                           value = "2014", min="2000", max="2018")),
+                            actionButton("dem_button", "Go"))
+                ),
+                # h2(textOutput("disp_count_str"), align="center"),
+                # p(textOutput("disp_str", inline=T), align="center"),
+                fluidRow(column(6, withSpinner(plotlyOutput("demographics_gender"), 
+                                               type=4, color="#b5b5b5", size=0.5)), 
+                         column(6, withSpinner(plotlyOutput("demographics_age"), 
+                                               type=4, color="#b5b5b5", size=0.5))),
+                withSpinner(plotlyOutput("demographics"), type=4, color="#b5b5b5", size=0.5)
        )
+       
        
        # Stops by offense ------------------------------------------
        # tabPanel("Stops by offense"#, 

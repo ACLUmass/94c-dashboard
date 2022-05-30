@@ -894,6 +894,226 @@ function(input, output, session) {
       }
       
     })
+    
+    # Demographics -----------------------------------------------------------------
+    
+    dem_values <- reactiveValues(agency = NULL)
+    
+    dems <- c("Male under 18", "Male aged 19 - 25", 
+              "Male aged 26 - 35", "Male aged 36 - 45", 
+              "Male aged 46 - 55", "Male over 55",
+              "Female under 18", "Female aged 19 - 25",
+              "Female aged 26 - 35", "Female aged 36 - 45", 
+              "Female aged 46 - 55", "Female over 55",
+              "Unknown")
+    
+    # Define pie colors 
+    dem_colors <- c(rep("rgba(51, 34, 136", 6), rep("rgba(136, 34, 85", 6), "rgb(211,211,211)")
+    dem_opacity <- c(seq(1, .2, length.out=6), seq(1, .2, length.out=6), 1) 
+    dem_colors <- paste0(dem_colors, ", ", dem_opacity, ")")
+    names(dem_colors) <- dems
+    
+    # Update year ranges based on year type
+    observe({
+      validate(
+        need(is.numeric(input$dem_start_year), 'Please enter a valid year.'),
+        need(is.numeric(input$dem_end_year), 'Please enter a valid year.')
+      )
+      
+      bounds <- get_year_bounds(input$dem_yr_type, 
+                                input$dem_start_year, 
+                                input$dem_end_year)
+      yr_min <- bounds[[1]]
+      yr_max <- bounds[[2]]
+      start_value <- bounds[[3]]
+      end_value <- bounds[[4]]
+      
+      updateNumericInput(session,
+                         "dem_start_year", value=start_value,
+                         max=yr_max, min=yr_min)
+      updateNumericInput(session,
+                         "dem_end_year", value=end_value,
+                         max=yr_max, min=yr_min)
+      
+    })
+    
+    # Calculate all the values for demographics plot
+    observeEvent(input$dem_button, {
+      
+      dem_values$town <- input$dem_city
+      dem_values$agency <- input$dem_dept
+      dem_values$court <- input$dem_court
+      dem_values$charge <- input$dem_charge
+      dem_values$disp <- input$dem_disp
+      dem_values$yr_type <- input$dem_yr_type
+      dem_values$start_yr <- input$dem_start_year
+      dem_values$end_yr <- input$dem_end_year
+      
+      results <- filter_and_get_label(
+        combined94c_data, 
+        town = dem_values$town,
+        agency = dem_values$agency,
+        crt = dem_values$court,
+        chrg = dem_values$charge,
+        disp = dem_values$disp,
+        year_type = dem_values$yr_type,
+        start_year=dem_values$start_yr,
+        end_year=dem_values$end_yr)
+      
+      data <- results[[1]]
+      dem_values$data <- data %>%
+        mutate(age_bin = case_when(
+                  age_at_file < 18 ~ "under 18",
+                  age_at_file <=25 ~ "aged 19 - 25",
+                  age_at_file <=35 ~ "aged 26 - 35",
+                  age_at_file <=45 ~ "aged 36 - 45",
+                  age_at_file <=55 ~ "aged 46 - 55",
+                  age_at_file > 55 ~ "over 55",
+                  T ~ as.character(age_at_file)),
+               dem = ifelse((is.na(age_bin)| is.na(gender)),
+                            "Unknown",
+                            paste(gender, age_bin)),
+               dem = factor(dem, levels=dems)) %>%
+        count(dem, name="N") %>%
+        arrange(dem)
+      
+      dem_values$data_gender <- data[, .N, gender] %>%
+        mutate(gender = ifelse(is.na(gender), "Unknown", gender),
+               gender = factor(gender, levels=c("Male", "Female", "Unknown"))) %>%
+        arrange(gender) 
+      
+      dem_values$data_age <- data$age_at_file
+    })
+    
+    # Create age histogram 
+    output$demographics_age <- renderPlotly({
+      
+      validate(
+        need(dem_values$data_age, '')
+      ) 
+      
+      plot_ly(x = dem_values$data_age, 
+              type = "histogram",
+              nbinsx=50,
+              marker = list(color = "darkgray",
+                            line = list(color = "darkgray",
+                                        width = 2)),
+              hovertemplate = paste('<i>Age</i>: %{x}',
+                                    '<br>Number charged: %{y:,.0f}<br>',
+                                    '<extra></extra>'),
+              height=200) %>%
+        layout(xaxis = list(title = 'Age (years)'), 
+               yaxis = list(title = 'Number of\nindividuals'),
+               showlegend = F,
+               font=list(family = "GT America"),
+               hoverlabel=list(font = list(family = "GT America"))) %>%
+        config(modeBarButtonsToRemove = plotly_modebar_to_remove)
+    })
+    
+    plotly_modebar_to_remove <- c("zoom2d","pan2d","select2d","lasso2d","zoomIn2d","zoomOut2d","autoScale2d")
+    
+    # Create gender bar plot
+    output$demographics_gender <- renderPlotly({
+      validate(
+        need(dem_values$data_gender, 'Please select filters and press "Go."')
+      )  
+      
+      dem_values$data_gender %>%
+        ggplot(aes(x=0, y=-N, 
+                   fill=gender,
+                   text=sprintf("Gender: %s<br># Charges: %s<br>%% Charges: %s", 
+                                gender, number(N, big.mark=","), 
+                                percent(N/sum(N), accuracy=.1)))) +
+        geom_col(width=.2, show.legend=F) +
+        coord_flip() +
+        scale_fill_manual(values=c("#332288", "#882255", "grey")) +        
+        xlim(-.5, .5) +
+        theme_void()
+      
+      ggplotly(tooltip="text", height=200) %>%
+        add_annotations(x = 0,
+                        y = .4,
+                        text = paste(number(dem_values$data_gender$N[[1]], big.mark=","), 
+                                     "charges\nto",
+                                     tolower(dem_values$data_gender$gender[[1]]),
+                                     "individuals"),
+                        text_position = "left",
+                        xanchor="left",
+                        yanchor="top",
+                        font=list(color="#332288"),
+                        showarrow=F,
+                        xref = "paper",
+                        yref = "paper") %>%
+        add_annotations(x = 1, 
+                        y = .6,
+                        text = paste(number(dem_values$data_gender$N[[2]], big.mark=","), 
+                                     "charges\nto",
+                                     tolower(dem_values$data_gender$gender[[2]]),
+                                     "individuals"),
+                        text_position = "inside",
+                        xanchor="right", 
+                        yanchor="bottom", 
+                        font=list(color="#882255"),
+                        showarrow=F,
+                        xref = "paper",
+                        yref = "paper") %>%
+        add_annotations(x = 1,
+                        y = .4,
+                        text = paste(number(dem_values$data_gender$N[[3]], big.mark=","), 
+                                     "charges\nto",
+                                     tolower(dem_values$data_gender$gender[[3]]),
+                                     "individuals"),
+                        text_position = "inside",
+                        xanchor="right",
+                        yanchor="top",
+                        font=list(color="darkgrey"),
+                        showarrow=F,
+                        xref = "paper",
+                        yref = "paper") %>%
+      layout(xaxis = list(zeroline = F, showgrid = FALSE, showticklabels = FALSE, zerolinecolor = '#ffff'),
+             yaxis = list(zeroline = F, showgrid = FALSE, showticklabels = FALSE, zerolinecolor = '#ffff'),
+             showlegend = F,
+             font=list(family = "GT America"),
+             hoverlabel=list(font = list(family = "GT America"))) %>%
+        config(modeBarButtonsToRemove = plotly_modebar_to_remove)
+    })
+    
+    # Create demographics pie chart
+    output$demographics <- renderPlotly({
+      
+      validate(
+        need(dem_values$data, '')
+      )
+      
+      data <- dem_values$data %>%
+        arrange(dem)
+      
+      dem_colors_here <- dem_colors[data$dem]
+    
+      if (nrow(data) > 0) {
+        
+        data %>%
+          plot_ly(sort=F,                 
+                  direction = "clockwise",
+                  marker = list(line = list(color = 'lightgrey', width = 1),
+                                colors=dem_colors_here),
+                  labels = ~dem, values = ~N,
+                  textposition = "inside"
+          ) %>%
+          add_pie(hovertemplate = '<i>Disposition</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
+          layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 showlegend = TRUE,
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America")),
+                 legend = list(x = 100, y = 0.5))
+        
+      } else {
+        # If there are no stops for the filter
+        empty_plotly("charges")
+      }
+      
+    })
 
 #     # Stops by offense ----------------------------------------------------------------
 #     

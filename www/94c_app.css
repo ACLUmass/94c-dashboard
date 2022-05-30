@@ -383,3 +383,11 @@ div[data-value="Compare stops over time"] label span {
   margin-left: 1.5rem;
 }
 
+/* Remove godforsaken zero lines */
+.xlines-above, .ylines-above {
+  display: none;
+}
+
+#demographics_age, #demographics_gender {
+  height: 200px !important;
+}
