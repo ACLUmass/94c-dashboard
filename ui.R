@@ -83,16 +83,16 @@ fluidPage(
       tags$link(rel = "icon", type = "image/png", sizes = "512x512", href = "favicon.png")
     ),
   
-    # # Add javascript for log tooltip
-    # tags$script(HTML('
-    #      $( document ).on("shiny:sessioninitialized", function(event) {
-    #           $(\'a[data-toggle="tooltip"]\').tooltip({
-    #               animated: "fade",
-    #               placement: "bottom",
-    #               html: true
-    #           });      
-    #      });'
-    # )),
+    # Add javascript for log tooltip
+    tags$script(HTML('
+         $( document ).on("shiny:sessioninitialized", function(event) {
+              $(\'a[data-toggle="tooltip"]\').tooltip({
+                  animated: "fade",
+                  placement: "bottom",
+                  html: true
+              });
+         });'
+    )),
     
     # App title
     div(id="title",
