@@ -449,20 +449,21 @@ function(input, output, session) {
                  hr(style="border: grey solid .5px;margin-top: 0rem; margin-bottom: 1rem;"),
                  em(paste0("District Attorney", if_else(n_DAs > 1, "s: ", ": "), DA_name_str),
               style="text-align: center; display: inline-block; margin-bottom: 1rem;")),
-            splitLayout(id="dashboard_split",
-                        div(h3(number(scandal_charges, big.mark=","), style="margin:0px;"), 
+            fluidRow(
+                        column(6, h3(number(scandal_charges, big.mark=","), style="margin:0px;"), 
                                h4("charges dismissed due to"), br(), h4(paste("lab scandal in", 
                                  DA_values$DA_cty, "county")),
                         plotlyOutput("DA_pie", height="300px")),
-                div(h4("Top Agencies"),
-                    tableOutput("DA_top_agencies"))
+                column(6, h4("Top Agencies"),
+                    tableOutput("DA_top_agencies")),
+                style="display:inherit;"
             ),
-            splitLayout(id="dashboard_split",
-                div(h4("Top Courts"),
+            fluidRow(
+                column(6, h4("Top Courts"),
                     tableOutput("DA_top_courts")),
-                div(h4("Most Common Charges"),
-                    tableOutput("DA_top_charges")
-            ))
+                column(6, h4("Most Common Charges"),
+                    tableOutput("DA_top_charges")),
+                style="display:inherit;")
         )
     })
 
@@ -952,7 +953,7 @@ function(input, output, session) {
                             line = list(color = "darkgray",
                                         width = 2)),
               hovertemplate = paste('<i>Age</i>: %{x}',
-                                    '<br>Number charged: %{y:,.0f}<br>',
+                                    '<br>Number charged: %{y:,.0f}',
                                     '<extra></extra>'),
               height=200) %>%
         layout(xaxis = list(title = 'Age (years)'), 

@@ -99,7 +99,7 @@ fluidPage(
         titlePanel("Prosecuting Drugs in Massachusetts, 2003 - 2014")
     ),
     
-    div(navlistPanel(widths = c(3, 9), id="panels",
+    div(navlistPanel(widths = c(3, 9), id="panels", 
     
        # About ----------------------------------------------------
        tabPanel("About", 
@@ -197,25 +197,25 @@ fluidPage(
           wellPanel(id="internal_well",
              em("Explore the 94C charges across Massachusetts. Filter the charges with the following criteria:"),
              fluidRow(
-               splitLayout(
-                 selectizeInput("map_dept", label="Agency / Department", c("All departments", all_depts)),
-                 selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts)),
-                 selectizeInput("map_charge", label="Charge", c("All charges", all_charges))
-               ),
-               splitLayout(
-                 selectizeInput("map_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
-                 numericInput("map_start_year", "Start Year",
-                              value = "2000", min="2000", max="2018"),
-                 numericInput("map_end_year", "End Year",
-                              value = "2014", min="2000", max="2018")),
-               splitLayout(
-                 radioButtons("map_radio", "Value Type",
+               fluidRow(
+               column(4,
+                 selectizeInput("map_dept", label="Agency / Department", c("All departments", all_depts))),
+               column(4, selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts))),
+               column(4, selectizeInput("map_charge", label="Charge", c("All charges", all_charges)))),
+               fluidRow(
+                 column(4, selectizeInput("map_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                 column(4, numericInput("map_start_year", "Start Year",
+                              value = "2000", min="2000", max="2018")),
+                 column(4, numericInput("map_end_year", "End Year",
+                              value = "2014", min="2000", max="2018"))),
+               fluidRow(
+                 column(6, radioButtons("map_radio", "Value Type",
                               choiceValues=c("Total charges",
                                         "Charges per capita"),
                               choiceNames=c("Total charges",
                                              "Charges per 1,000 population"),
-                              selected="Total charges", inline=F),
-                 div(id="map_log_span",
+                              selected="Total charges", inline=F)),
+                 column(6, div(id="map_log_span",
                      div(tags$b("Numeric Scale")),
                       checkboxInput("map_log",
                                     span("Plot logarithmic scale",
@@ -224,7 +224,7 @@ fluidPage(
                                            `data-toggle`="tooltip",
                                            title=log_tooltip_html)),
                                     value=T)
-                      ))),
+                      )))),
                actionButton("map_button", "Go")),
          withSpinner(leafletOutput("charges_by_town"), type=4, color="#b5b5b5", size=0.5)
        ),
@@ -234,20 +234,20 @@ fluidPage(
                 wellPanel(id="internal_well",
                           em("Explore the dispositions (outcomes) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
                   fluidRow(
-                    splitLayout(
-                      selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns)),
-                      selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts))
+                    fluidRow(
+                      column(6, selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns))),
+                      column(6, selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts)))
                     ),
-                    splitLayout(
-                      selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts)),
-                      selectizeInput("disp_charge", label="Charge", c("All charges", all_charges))
+                    fluidRow(
+                      column(6, selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts))),
+                      column(6, selectizeInput("disp_charge", label="Charge", c("All charges", all_charges)))
                     ),
-                  splitLayout(
-                      selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
-                      numericInput("disp_start_year", "Start Year",
-                                value = "2000", min="2000", max="2018"),
-                      numericInput("disp_end_year", "End Year",
-                                   value = "2014", min="2000", max="2018")),
+                  fluidRow(
+                      column(4, selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                      column(4 ,numericInput("disp_start_year", "Start Year",
+                                value = "2000", min="2000", max="2018")),
+                      column(4, numericInput("disp_end_year", "End Year",
+                                   value = "2014", min="2000", max="2018"))),
                 actionButton("disp_button", "Go"))
                 ),
                 h2(textOutput("disp_count_str"), align="center"),
@@ -261,13 +261,13 @@ fluidPage(
                           
                           em("Explore 94C charging trends over time. Filter the charges with the following criteria:"),
                           fluidRow(
-                            splitLayout(
-                              selectizeInput("time_city", "Town/City", c("All cities and towns", all_towns)),
-                              selectizeInput("time_dept", label="Agency / Department", c("All departments", all_depts))
+                            fluidRow(
+                              column(6, selectizeInput("time_city", "Town/City", c("All cities and towns", all_towns))),
+                              column(6, selectizeInput("time_dept", label="Agency / Department", c("All departments", all_depts)))
                             ),
-                            splitLayout(
-                              selectizeInput("time_court", "Court", c("All courts"="All courts", all_courts)),
-                              selectizeInput("time_disp", label="Disposition", c("All dispositions", all_disps))
+                            fluidRow(
+                              column(6, selectizeInput("time_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(6, selectizeInput("time_disp", label="Disposition", c("All dispositions", all_disps)))
                             ),
                             selectizeInput("time_charge", label="Charge", c("All charges", all_charges))
                           ),
@@ -275,13 +275,15 @@ fluidPage(
                           conditionalPanel(
                             condition = "input.compare_time == true",
                             fluidRow(
-                              splitLayout(
-                                selectizeInput("time_city2", "Town/City", c("All cities and towns", all_towns)),
-                                selectizeInput("time_dept2", label="Agency / Department", c("All departments", all_depts))
+                              fluidRow(
+                                column(6, selectizeInput("time_city2", "Town/City", 
+                                               c("All cities and towns", all_towns))),
+                                column(6, selectizeInput("time_dept2", label="Agency / Department", 
+                                               c("All departments", all_depts)))
                               ),
-                              splitLayout(
-                                selectizeInput("time_court2", "Court", c("All courts"="All courts", all_courts)),
-                                selectizeInput("time_disp2", label="Disposition", c("All dispositions", all_disps))
+                              fluidRow(
+                                column(6, selectizeInput("time_court2", "Court", c("All courts"="All courts", all_courts))),
+                                column(6, selectizeInput("time_disp2", label="Disposition", c("All dispositions", all_disps)))
                               ),
                               selectizeInput("time_charge2", label="Charge", c("All charges", all_charges))
                             )),
@@ -296,29 +298,29 @@ fluidPage(
                 wellPanel(id="internal_well",
                           em("Explore the demographics of individuals charged under Chapter 94C in Massachusetts. Filter with the following criteria:"),
                           fluidRow(
-                            splitLayout(
-                              selectizeInput("dem_city", "Town/City", c("All cities and towns", all_towns)),
-                              selectizeInput("dem_dept", label="Agency / Department", c("All departments", all_depts))
+                            fluidRow(
+                              column(6, selectizeInput("dem_city", "Town/City", c("All cities and towns", all_towns))),
+                              column(6, selectizeInput("dem_dept", label="Agency / Department", c("All departments", all_depts)))
                             ),
-                            splitLayout(
-                              selectizeInput("dem_court", "Court", c("All courts"="All courts", all_courts)),
-                              selectizeInput("dem_charge", label="Charge", c("All charges", all_charges)),
-                              selectizeInput("dem_disp", label="Disposition", c("All dispositions", all_disps))
+                            fluidRow(
+                              column(4, selectizeInput("dem_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(4, selectizeInput("dem_charge", label="Charge", c("All charges", all_charges))),
+                              column(4, selectizeInput("dem_disp", label="Disposition", c("All dispositions", all_disps)))
                             ),
-                            splitLayout(
-                              selectizeInput("dem_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing"),
-                              numericInput("dem_start_year", "Start Year",
-                                           value = "2000", min="2000", max="2018"),
-                              numericInput("dem_end_year", "End Year",
-                                           value = "2014", min="2000", max="2018")),
+                            fluidRow(
+                              column(4, selectizeInput("dem_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                              column(4, numericInput("dem_start_year", "Start Year",
+                                           value = "2000", min="2000", max="2018")),
+                              column(4, numericInput("dem_end_year", "End Year",
+                                           value = "2014", min="2000", max="2018"))),
                             actionButton("dem_button", "Go"))
                 ),
                 # h2(textOutput("disp_count_str"), align="center"),
                 # p(textOutput("disp_str", inline=T), align="center"),
-                fluidRow(column(6, withSpinner(plotlyOutput("demographics_gender"), 
-                                               type=4, color="#b5b5b5", size=0.5)), 
-                         column(6, withSpinner(plotlyOutput("demographics_age"), 
-                                               type=4, color="#b5b5b5", size=0.5))),
+                fluidRow(div(withSpinner(plotlyOutput("demographics_gender"), 
+                                               type=4, color="#b5b5b5", size=0.5), class="col-md-6"), 
+                         div(withSpinner(plotlyOutput("demographics_age"), 
+                                               type=4, color="#b5b5b5", size=0.5), class="col-md-6")),
                 withSpinner(plotlyOutput("demographics"), type=4, color="#b5b5b5", size=0.5)
        )
        
@@ -429,7 +431,7 @@ fluidPage(
                 # 
         )
         # )
-    ),
+       ),
     
     div(id="footer",
         # hr(),

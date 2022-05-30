@@ -45,29 +45,21 @@ body {
   margin-right: 5%;
 }
 
-.row {
-  display: flex;
-}
-
-.well .row {
-  display: inherit;
-}
-
 #title {
   background-color: #00343a;
   color: white;
-  width: 120%;
-  margin-left: -8%;
+  margin-left: -15px;
   margin-right: -8%;
+  padding-top: 10px;
   padding-bottom: 10px;
-  height: 75px;
+  min-height: 75px;
   border-bottom: #ffdf69 solid 6px;
 }
 
 #title h2 {
   display:inline;
-  position: absolute;
-  margin-left: 10%;
+  margin-left: 5%;
+  box-decoration-break: clone;
 }
 
 label {
@@ -99,13 +91,23 @@ label {
   background-color: #00343a;
   border-radius: 0;
   border: none;
-  margin-left: calc(-5% + 15px);
-  padding-left: 5%;
   margin-bottom: 0px;
 }
 
 .col-sm-9 {
   padding-top: 2rem;
+  background-color: white;
+}
+
+/* Extend green color */
+.container-fluid > div > .row {
+  background-color: #00343a;
+}
+
+@media (max-width: 767px) {
+  .container-fluid > div > .row {
+    margin-left: 0;
+  }
 }
 
 .nav-pills>li.active>a, 
@@ -339,7 +341,7 @@ div[data-value="Compare stops over time"] label span {
 }
 
 #DA_map {
-  height: 300px !important;
+  height: 250px !important;
 }
 
 #DA_start_year, #DA_end_year {
