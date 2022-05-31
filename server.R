@@ -305,6 +305,31 @@ function(input, output, session) {
     )
 
     # District Attorneys ----------------------------------------------------------
+    
+    # Update year ranges based on year type
+    observe({
+      yr_min <- 2003
+      yr_max <- 2014
+      
+      if (input$DA_start_year < yr_min) {
+        updateNumericInput(session,
+                           "DA_start_year", value=yr_min,
+                           max=yr_max, min=yr_min)
+      } else if (input$DA_end_year < yr_min) {
+        updateNumericInput(session,
+                           "DA_end_year", value=yr_min,
+                           max=yr_max, min=yr_min)
+      } else if (input$DA_start_year > yr_max) {
+        updateNumericInput(session,
+                           "DA_start_year", value=yr_max,
+                           max=yr_max, min=yr_min)
+      } else if (input$DA_end_year > yr_max) {
+        updateNumericInput(session,
+                           "DA_end_year", value=yr_max,
+                           max=yr_max, min=yr_min)
+      }
+    })
+    
     DA_values <- reactiveValues(done = NULL)
     
     DA_data <- combined94c_data %>%
@@ -1413,7 +1438,7 @@ function(input, output, session) {
                   labels = ~dem, values = ~N,
                   textposition = "inside"
           ) %>%
-          add_pie(hovertemplate = '<i>Disposition</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
+          add_pie(hovertemplate = '<i>Gender</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
           layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                  yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                  showlegend = TRUE,

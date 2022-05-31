@@ -157,7 +157,7 @@ fluidPage(
                 
                 h3("Source Code"),
                 p("Interested programmers can view the source code for this app, written in R, on",
-                  a("GitHub (BROKEN).", href="#")),
+                  a("GitHub.", href="https://github.com/ACLUmass/94c-dashboard")),
        br(),br()
        ),
        
@@ -181,12 +181,12 @@ fluidPage(
             wellPanel(id="internal_well",
                       selectizeInput("DA_county", "District", choices=all_DAs),
                         numericInput("DA_start_year", "Start Year",
-                                     value = "2003", min="2003", max="2014"),
+                                     value = 2003, min=2003, max=2014),
                         numericInput("DA_end_year", "End Year",
-                                     value = "2014", min="2003", max="2014"))),
+                                     value = 2014, min=2003, max=2014))),
                       # actionButton("DA_button", "Go"))),
             column(6, withSpinner(div(leafletOutput("DA_map"), 
-                                      em("Click to select county."), style="text-align: center;"), 
+                                      em("Click on district to display DA statistics."), style="text-align: center;"), 
                                   type=4, color="#b5b5b5", size=0.5))),
           withSpinner(uiOutput("DA_dashboard"), type=4, color="#b5b5b5", size=0.5)
           ),
@@ -323,7 +323,7 @@ fluidPage(
                 div(id="class_desc", 
                     em("Drug class examples from the", a("Massachusetts General Laws", href="https://malegislature.gov/laws/generallaws/parti/titlexv/chapter94c/section31", target="_blank"), ":",
                 tags$ul(
-                  tags$li("Class A - e.g., heroin, fentanyl, ecstacy"),
+                  tags$li("Class A - e.g., heroin, fentanyl, ecstasy"),
                   tags$li("Class B - e.g., cocaine, LSD, methamphetamines, Oxycodone"),
                   tags$li("Class C - e.g., magic mushrooms, Valium, Vicodin"),
                   tags$li("Class D - marijuana"),
@@ -516,7 +516,7 @@ fluidPage(
             a(href="https://www.data.aclum.org/",  target="_blank",
               img(src="D4J-logo.png", height="50px", 
                   style="display: inline; margin: 10px;"))),
-        p("Please contact data4justice@aclum.org with questions.", align="center", style="opacity: 0.6;"),
-        p("Icons by FontAwesome and", a("Flaticon", href="https://www.flaticon.com/free-icon/police_811976"), align="center", style="opacity: 0.6; margin-top: -10px; font-size: 1rem; margin-bottom: 0px")
+        p("Please contact data4justice@aclum.org with questions.", align="center", style="opacity: 0.6;")
+        # p("Icons by FontAwesome and", a("Flaticon", href="https://www.flaticon.com/free-icon/police_811976"), align="center", style="opacity: 0.6; margin-top: -10px; font-size: 1rem; margin-bottom: 0px")
     )
   )

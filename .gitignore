@@ -2,3 +2,4 @@
 *.Rproj
 /dev
 /rsconnect
+.Rproj.user
