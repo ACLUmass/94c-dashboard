@@ -18,6 +18,8 @@ disp_cats_df <- read_csv("data/94c_dispositions.csv")
 disp_colors <- readRDS("data/disp_colors.rds")
 ma_towns <- read_rds("data/ma_towns.rds")
 DAs <- read_csv("data/DAs.csv")
+all_towns <- read_rds("data/all_towns.rds")
+load("data/violent_data.RData")
 
 # Load data
 combined94c_data_raw <- fread("94c_combined.csv") 
@@ -142,7 +144,7 @@ function(input, output, session) {
       if(town != "All cities and towns") {
         data <- data[jurisdiction == town]
         if (town != "Not Listed") {
-        town_str <- paste("in", town)
+          town_str <- paste("in", town)
         } else {
           town_str <- "without reporting town/city"
         }
@@ -475,7 +477,164 @@ function(input, output, session) {
                 style="display:inherit;")
         )
     })
+    
+    # Scandal -------------------------------------------------------------------
 
+    # Update geo dropdown
+    observeEvent(input$scandal_radio, {
+      if (input$scandal_radio == "State") {
+        disable("scandal_geo")
+        updateSelectInput(session, "scandal_geo",
+                          choices = c())
+      } else if (input$scandal_radio == "County") {
+        enable("scandal_geo")
+        updateSelectInput(session, "scandal_geo",
+                          choices = combined94c_data %>% pull(county) %>% unique() %>% sort())
+      } else if (input$scandal_radio == "City/Town") {
+        enable("scandal_geo")
+        updateSelectInput(session, "scandal_geo",
+                          choices = tail(all_towns, n=length(all_towns) -1) %>% sort())
+      }
+    })
+    
+    # Watch for button press
+    scandal_values <- reactiveValues(radio=NULL)
+    observeEvent(input$scandal_button, {
+      scandal_values$radio <- input$scandal_radio
+      scandal_values$geo <- input$scandal_geo
+    })
+    
+    # Update plots
+    output$scandal_dashboard <- renderUI({
+      validate(
+        need(scandal_values$radio, 'Please select a geography and press "Go".')
+      )
+      
+      if (scandal_values$radio== "State") {
+        data <- combined94c_data
+        text <- "Massachusetts"
+      } else if (scandal_values$radio  == "County") {
+        data <- combined94c_data %>%
+          filter(county == scandal_values$geo)
+        text <- paste(scandal_values$geo, "County")
+      } else if (scandal_values$radio  == "City/Town") {
+        data <- combined94c_data %>%
+          filter(jurisdiction == scandal_values$geo)
+        text <- scandal_values$geo
+      }
+      
+      n_charges <- data %>% 
+          filter(disposition_cat == "Dismissed (Lab Misconduct)") %>%
+        nrow()
+      
+      output$n_charges <- renderText(number(n_charges, big.mark=","))
+      
+      output$n_cases <- renderText(number(
+        data %>% 
+          filter(disposition_cat == "Dismissed (Lab Misconduct)") %>%
+          distinct(case_id) %>% nrow(), 
+        big.mark=","))
+      
+      output$geo_str <- renderText(text)
+      output$geo_str1 <- renderText(paste0(text, ":"))
+      
+      # Percent implicated in scandal
+      output$scandal_pie <- renderPlotly({
+        
+        data %>%
+          mutate(in_scandal = ifelse(
+            disposition_cat == "Dismissed (Lab Misconduct)", 
+            "Charges dismissed due to scandal", "Other 94C charges")) %>%
+          count(in_scandal, name="N") %>%
+          arrange(in_scandal) %>%
+          plot_ly(sort=F,
+                  direction = "clockwise",
+                  marker = list(line = list(color = 'lightgrey', width = 1),
+                                colors=c("#a7d7b5", "black")),
+                  labels = ~in_scandal, values = ~N,
+                  textposition = "inside") %>%
+          add_pie(hovertemplate = '%{value} charges (%{percent})<extra></extra>') %>%
+          layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 showlegend = T,
+                 margin = list(l = 20, r = 20),
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America")),
+                 legend = list(x = .5, y = -10))
+      })
+      
+      # Crime after dismissals
+      output$crime <- renderPlotly({
+        if (scandal_values$radio  == "State") {
+          violent_data <- ma_violent_df
+        } else if (scandal_values$radio  == "County") {
+          violent_data <- cnty_violent_df %>%
+            filter(geo == paste(scandal_values$geo, "County"))
+        } else if (scandal_values$radio  == "City/Town") {
+          violent_data <- twns_violent_df  %>%
+            filter(geo == scandal_values$geo)
+        }
+        
+        violent_data <- violent_data %>%
+          filter(year(date) >= 2016)
+        
+        
+        if (n_charges > 0) {
+          violent_data %>%
+            plot_ly(x = ~date, y = ~actual_violent_offenses, 
+                    type = 'scatter', mode = 'lines',
+                    hovertemplate = '%{y:,.0f} violent offenses in %{x}<extra></extra>',
+                    line = list(color = '#3c3532', width=2.5), opacity=.7) %>%
+            layout(yaxis = list(title = "Number of violent offenses", zeroline = F),
+                   xaxis = list(title="Date", zeroline = F),
+                   font=list(family = "GT America"),
+                   hoverlabel=list(font = list(family = "GT America")),
+                   annotations = list(list(
+                     showarrow = F, opacity = 0.7,
+                     x = .5, xref="paper", xanchor = "center",
+                     y = 1.01, yref="paper",yanchor="bottom",
+                     text = "<i>Click and drag to zoom in on a specific date range</i>"
+                   ))) %>%
+            layout(shapes = list(
+              list(type="line", x0=ymd("20170420"),x1=ymd("20170420"), y0=0, y1=1, yref="paper", line = list(color = "#d62728", dash="dash")),
+              list(type="line", x0=ymd("20180405"),x1=ymd("20180405"), y0=0, y1=1, yref="paper", line = list(color = "#0055aa", dash="dash")),
+              list(type="line", x0=ymd("20181011"),x1=ymd("20181011"), y0=0, y1=1, yref="paper", line = list(color = "#0055aa", dash="dash"))
+              )) %>%
+            add_annotations(text="Dookhan\ndismissals",
+                      x=ymd("20170420"),
+                      y=0, yref="paper", textangle=270, 
+                      font = list(family = "GT America",color="#d62728"),
+                      yanchor="bottom", xanchor="right",showarrow=F,
+                      bgcolor="rgba(255,255,255,0.5)") %>%
+            add_annotations(text="Farak\ndismissals",
+                            x=ymd("20180405"),
+                            y=0, yref="paper", textangle=270, 
+                            font = list(family = "GT America",color="#0055aa"),
+                            yanchor="bottom", xanchor="right",showarrow=F,
+                            bgcolor="rgba(255,255,255,0.5)") %>%
+            add_annotations(text="Farak\ndismissals",
+                            x=ymd("20181011"),
+                            y=0, yref="paper", textangle=270, 
+                            font = list(family = "GT America",color="#0055aa"),
+                            yanchor="bottom", xanchor="right",showarrow=F,
+                            bgcolor="rgba(255,255,255,0.5)") 
+        } else {
+          empty_plotly("dismissed charges")
+        }
+      })
+        
+        tagList(
+          div(class="scandal_numbers",
+              h3(textOutput("geo_str1", inline=T)),
+              h4(textOutput("n_charges")), "charges dismissed across",
+              h4(textOutput("n_cases")), "cases in ", textOutput("geo_str", inline=T)
+          ),
+          fluidRow(
+            column(4, div(class="scandal_title", "What percentage of drug-related\ncharges were dismissed?"), plotlyOutput("scandal_pie")),
+            column(8, div(class="scandal_title", "How does the dismissal timeline compare to\nstate-reported rates of", a("violent crime", href="https://masscrime.chs.state.ma.us/public/Browse/browsetables.aspx?PerspectiveLanguage=en", target="_blank"), "?"), plotlyOutput("crime"))
+          ))
+      })
+    
     # Mapping stops -------------------------------------------------------------------
 
     charges_map <- reactiveValues(data=NULL)
@@ -952,26 +1111,26 @@ function(input, output, session) {
       
       validate(
         need(dem_values$data_gender, 'Please select filters and press "Go."')
-      ) 
+      )  
       
       plotly_modebar_to_remove <- c("zoom2d","pan2d","select2d","lasso2d",
                                     "zoomIn2d","zoomOut2d","autoScale2d")
-    
-    # Create gender bar plot
-    output$demographics_gender <- renderPlotly({
       
-      dem_values$data_gender %>%
-        ggplot(aes(x=0, y=-N, 
-                   fill=gender,
-                   text=sprintf("Gender: %s<br># Charges: %s<br>%% Charges: %s", 
-                                gender, number(N, big.mark=","), 
-                                percent(N/sum(N), accuracy=.1)))) +
-        geom_col(width=.2, show.legend=F) +
-        coord_flip() +
-        scale_fill_manual(values=c("#332288", "#882255", "grey")) +        
-        xlim(-.5, .5) +
-        theme_void()
-      
+      # Create gender bar plot
+      output$demographics_gender <- renderPlotly({
+        
+        dem_values$data_gender %>%
+          ggplot(aes(x=0, y=-N, 
+                     fill=gender,
+                     text=sprintf("Gender: %s<br># Charges: %s<br>%% Charges: %s", 
+                                  gender, number(N, big.mark=","), 
+                                  percent(N/sum(N), accuracy=.1)))) +
+          geom_col(width=.2, show.legend=F) +
+          coord_flip() +
+          scale_fill_manual(values=c("#332288", "#882255", "grey")) +        
+          xlim(-.5, .5) +
+          theme_void()
+        
         N_m <- dem_values$data_gender %>%
           filter(gender == "Male") %>%
           pull(N)
@@ -1002,45 +1161,45 @@ function(input, output, session) {
                                        "\nto individuals of\nunknown gender"),
                         "No individuals\nof unknown gender\ncharged")
         
-      ggplotly(tooltip="text", height=200) %>%
-        add_annotations(x = 0,
-                        y = .4,
+        ggplotly(tooltip="text", height=200) %>%
+          add_annotations(x = 0,
+                          y = .4,
                           text = m_str,
-                        text_position = "left",
-                        xanchor="left",
-                        yanchor="top",
-                        font=list(color="#332288"),
-                        showarrow=F,
-                        xref = "paper",
-                        yref = "paper") %>%
-        add_annotations(x = 1, 
-                        y = .6,
+                          text_position = "left",
+                          xanchor="left",
+                          yanchor="top",
+                          font=list(color="#332288"),
+                          showarrow=F,
+                          xref = "paper",
+                          yref = "paper") %>%
+          add_annotations(x = 1, 
+                          y = .6,
                           text = f_str,
-                        text_position = "inside",
-                        xanchor="right", 
-                        yanchor="bottom", 
-                        font=list(color="#882255"),
-                        showarrow=F,
-                        xref = "paper",
-                        yref = "paper") %>%
-        add_annotations(x = 1,
-                        y = .4,
+                          text_position = "inside",
+                          xanchor="right", 
+                          yanchor="bottom", 
+                          font=list(color="#882255"),
+                          showarrow=F,
+                          xref = "paper",
+                          yref = "paper") %>%
+          add_annotations(x = 1,
+                          y = .4,
                           text = u_str,
-                        text_position = "inside",
-                        xanchor="right",
-                        yanchor="top",
-                        font=list(color="darkgrey"),
-                        showarrow=F,
-                        xref = "paper",
-                        yref = "paper") %>%
-      layout(xaxis = list(zeroline = F, showgrid = FALSE, showticklabels = FALSE, zerolinecolor = '#ffff'),
-             yaxis = list(zeroline = F, showgrid = FALSE, showticklabels = FALSE, zerolinecolor = '#ffff'),
-             showlegend = F,
-             font=list(family = "GT America"),
-             hoverlabel=list(font = list(family = "GT America"))) %>%
-        config(modeBarButtonsToRemove = plotly_modebar_to_remove)
-    })
-    
+                          text_position = "inside",
+                          xanchor="right",
+                          yanchor="top",
+                          font=list(color="darkgrey"),
+                          showarrow=F,
+                          xref = "paper",
+                          yref = "paper") %>%
+          layout(xaxis = list(zeroline = F, showgrid = FALSE, showticklabels = FALSE, zerolinecolor = '#ffff'),
+                 yaxis = list(zeroline = F, showgrid = FALSE, showticklabels = FALSE, zerolinecolor = '#ffff'),
+                 showlegend = F,
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America"))) %>%
+          config(modeBarButtonsToRemove = plotly_modebar_to_remove)
+      })
+      
       
       # Create age histogram 
       output$demographics_age <- renderPlotly({
@@ -1063,14 +1222,14 @@ function(input, output, session) {
           config(modeBarButtonsToRemove = plotly_modebar_to_remove)
       })
       
-    # Create demographics pie chart
-    output$demographics <- renderPlotly({
-      
-      data <- dem_values$data %>%
-        arrange(dem)
-      
-      dem_colors_here <- dem_colors[data$dem]
-    
+      # Create demographics pie chart
+      output$demographics <- renderPlotly({
+        
+        data <- dem_values$data %>%
+          arrange(dem)
+        
+        dem_colors_here <- dem_colors[data$dem]
+          
         data %>%
           plot_ly(sort=F,                 
                   direction = "clockwise",
@@ -1087,7 +1246,7 @@ function(input, output, session) {
                  hoverlabel=list(font = list(family = "GT America")),
                  legend = list(x = 100, y = 0.5))
       })
-        
+      
       output$empty <- renderPlotly({
         empty_plotly("charges")
       })

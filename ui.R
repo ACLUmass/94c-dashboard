@@ -73,7 +73,7 @@ theme_update(text = element_text(family="GT America"),
 # UI --------------------------------------------------------------------------
 
 fluidPage(
-  # useShinyjs(),  # Set up shinyjs
+  useShinyjs(),  # Set up shinyjs
   theme = "94c_app.css",
     
     # Add favicon          
@@ -190,6 +190,30 @@ fluidPage(
                                   type=4, color="#b5b5b5", size=0.5))),
           withSpinner(uiOutput("DA_dashboard"), type=4, color="#b5b5b5", size=0.5)
           ),
+       
+       # Scandal -----------------------------------------------------------
+       tabPanel("The Drug Scandal",
+                fluidRow(
+                  column(9, p("Over a period of ten years, two state chemists working at Massachusetts engaged in misconduct that called into serious question the accuracy of their tests. State drug lab tests are used to identify confiscated substances and are critical information used to convict those accused of violating drug law. Tests conducted by chemist Sonja Farak between 2004 and 2013 at the Amherst Drug Lab and by Annie Dookhan between 2003 and 2011 at the Hinton State Laboratory were called into question. As a result, the Massachusetts Supreme Judicial Court ordered the dismissal of over 60,000 charges across over 38,000 cases."),
+                p("For more information about the drug scandal, see the",
+                  a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information"), "or the", 
+                  HTML("<a href='https://www.netflix.com/title/80233339'>Netflix documentary <i>How to Fix a Drug Scandal</i></a>.")), 
+                style="margin-bottom:3rem"),
+                column(3, div(class="scandal_numbers",
+                  h1("60,245", style="margin-bottom: 0"), "charges dismissed across",
+                  h1("38,008", style="margin: 0"),
+                  p("cases", style="margin-bottom: 2.5rem; margin-left: 0;")
+                ))
+                ),
+                wellPanel(id="internal_well", class="scandal_well",
+                          em("Explore the effects of the scandal across various Massachusetts counties, cities, and towns. Select a geography to explore:"),
+                          span(
+                          radioButtons("scandal_radio", label=NULL, choices=c("State", "County", "City/Town"), inline=T), style="width:50%; margin-right:6%; display:inline-block;"),
+                          span(disabled(selectizeInput("scandal_geo",label=NULL, choices=c())), style="width:43%; display:inline-block;"),
+                          actionButton("scandal_button", "Go")
+                          ),
+                withSpinner(uiOutput("scandal_dashboard"), type=4, color="#b5b5b5", size=0.5)
+       ),
        
        # Mapping charges --------------------------------------------------------------
        tabPanel("Mapping Charges",
