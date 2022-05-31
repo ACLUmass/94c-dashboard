@@ -14,6 +14,7 @@ library(sf)
 
 # Load data with fread
 charge_cats_df <- read_csv("data/94c_charge_codes.csv")
+charge_colors <- readRDS("data/charge_colors.rds")
 disp_cats_df <- read_csv("data/94c_dispositions.csv")
 disp_colors <- readRDS("data/disp_colors.rds")
 ma_towns <- read_rds("data/ma_towns.rds")
@@ -87,6 +88,14 @@ combined94c_data <- combined94c_data %>%
                                     "Not Delinquent (Juvenile)", 
                                     "Not Listed", "Other")))
 
+# Further condense charge categories
+combined94c_data <- combined94c_data %>%
+  mutate(charge_cat = factor(charge_cat, 
+                             levels=c("Possession", "Distribution", "Violation",
+                                      "Conspiracy", "Trafficking", "Fraud",
+                                      "Prescriptions", "Paraphernalia/Needles",
+                                      "Minors", "Larceny", "Labelling",
+                                      "Not Listed"))) 
 
 all_courts <- combined94c_data[order(court), court] %>%
   unique()
@@ -152,7 +161,7 @@ function(input, output, session) {
       
       if(agency != "All departments") {
         data <- data[department == agency]
-        dept_str <- paste("by the", agency, "Police Department")
+        dept_str <- paste("by the", agency)
       }
       
       if(crt != "All courts") {
@@ -861,7 +870,6 @@ function(input, output, session) {
         output$disp_count_str <- renderText(data %>% pull(N) %>%sum() %>% scales::comma())
         
         disp_colors_here <- disp_colors[data$disposition_cat]
-        disp_colors_here
 
         if (nrow(data) > 0) {
           
@@ -886,6 +894,100 @@ function(input, output, session) {
             empty_plotly("charges")
         }
 
+    })
+    
+    # Charge Type -----------------------------------------------------------------
+    
+    charge_values <- reactiveValues(agency = NULL)
+    
+    # Update year ranges based on year type
+    observe({
+      validate(
+        need(is.numeric(input$charge_start_year), 'Please enter a valid year.'),
+        need(is.numeric(input$charge_end_year), 'Please enter a valid year.')
+      )
+      
+      bounds <- get_year_bounds(input$charge_yr_type, 
+                                input$charge_start_year, 
+                                input$charge_end_year)
+      yr_min <- bounds[[1]]
+      yr_max <- bounds[[2]]
+      start_value <- bounds[[3]]
+      end_value <- bounds[[4]]
+      
+      updateNumericInput(session,
+                         "charge_start_year", value=start_value,
+                         max=yr_max, min=yr_min)
+      updateNumericInput(session,
+                         "charge_end_year", value=end_value,
+                         max=yr_max, min=yr_min)
+      
+    })
+    
+    # Calculate all the values for charge type plot
+    observeEvent(input$charge_button, {
+      
+      charge_values$town <- input$charge_city
+      charge_values$agency <- input$charge_dept
+      charge_values$court <- input$charge_court
+      charge_values$disp <- input$charge_disp
+      charge_values$yr_type <- input$charge_yr_type
+      charge_values$start_yr <- input$charge_start_year
+      charge_values$end_yr <- input$charge_end_year
+      
+      results <- filter_and_get_label(
+        combined94c_data, town = charge_values$town,
+        agency = charge_values$agency,
+        crt = charge_values$court,
+        disp = charge_values$disp,
+        year_type = charge_values$yr_type,
+        start_year=charge_values$start_yr,
+        end_year=charge_values$end_yr)
+      
+      data <- results[[1]]
+      charge_values$data <- data[, .N, charge_cat] 
+      
+      label <- results[[2]]
+      output$charge_str <- renderText(label)
+    })
+    
+    # Create charge plot
+    output$charge <- renderPlotly({
+      
+      validate(
+        need(charge_values$data, 'Please select filters and press "Go."')
+      )
+      
+      data <- charge_values$data %>%
+        arrange(charge_cat)
+      
+      output$charge_count_str <- renderText(data %>% pull(N) %>%sum() %>% scales::comma())
+      
+      charge_colors_here <- charge_colors[data$charge_cat]
+      
+      if (nrow(data) > 0) {
+        
+        data %>%
+          plot_ly(sort=F,
+                  direction = "clockwise",
+                  marker = list(line = list(color = 'lightgrey', width = 1),
+                                colors=charge_colors_here),
+                  labels = ~charge_cat, values = ~N,
+                  textposition = "inside"
+          ) %>%
+          add_pie(hovertemplate = '<i>Charge</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
+          layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 showlegend = TRUE,
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America")),
+                 legend = list(x = 100, y = 0.5))
+        
+      } else {
+        # If there are no stops for the filter
+        empty_plotly("charges")
+      }
+      
     })
     
     # Stops over time -----------------------------------------------------------------

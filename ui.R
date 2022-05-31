@@ -278,6 +278,32 @@ fluidPage(
                 withSpinner(plotlyOutput("disposition"), type=4, color="#b5b5b5", size=0.5)
                 ),
        
+       # Charge type ------------------------------------------
+       tabPanel("Charge Type", 
+                wellPanel(id="internal_well",
+                          em("Explore the types of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
+                          fluidRow(
+                            fluidRow(
+                              column(6, selectizeInput("charge_city", "Town/City", c("All cities and towns", all_towns))),
+                              column(6, selectizeInput("charge_dept", label="Agency / Department", c("All departments", all_depts)))
+                            ),
+                            fluidRow(
+                              column(6, selectizeInput("charge_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(6, selectizeInput("charge_disp", label="Disposition", c("All dispositions", all_disps)))
+                            ),
+                            fluidRow(
+                              column(4, selectizeInput("charge_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                              column(4 ,numericInput("charge_start_year", "Start Year",
+                                                     value = "2000", min="2000", max="2018")),
+                              column(4, numericInput("charge_end_year", "End Year",
+                                                     value = "2014", min="2000", max="2018"))),
+                            actionButton("charge_button", "Go"))
+                ),
+                h2(textOutput("charge_count_str"), align="center"),
+                p(textOutput("charge_str", inline=T), align="center"),
+                withSpinner(plotlyOutput("charge"), type=4, color="#b5b5b5", size=0.5)
+       ),
+       
        # Charges over time ------------------------------------------
        tabPanel("Compare charges over time", 
                 wellPanel(id="internal_well",

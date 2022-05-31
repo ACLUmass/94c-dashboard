@@ -442,3 +442,9 @@ div[data-value="Compare stops over time"] label span {
   font-size: 1.5rem;
   display: inline;
 }
+
+#charge, #disposition {
+  max-width: 610px;
+  margin-left: auto;
+  margin-right: auto;
+}
