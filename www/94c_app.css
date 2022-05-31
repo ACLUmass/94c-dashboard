@@ -104,6 +104,10 @@ label {
   background-color: #00343a;
 }
 
+.container-fluid > div > .row > .col-sm-9 {
+  min-height: 100vh;
+}
+
 @media (max-width: 767px) {
   .container-fluid > div > .row {
     margin-left: 0;
@@ -447,4 +451,10 @@ div[data-value="Compare stops over time"] label span {
   max-width: 610px;
   margin-left: auto;
   margin-right: auto;
+}
+
+#class_desc {
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
 }

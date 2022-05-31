@@ -959,7 +959,8 @@ function(input, output, session) {
       )
       
       data <- charge_values$data %>%
-        arrange(charge_cat)
+        arrange(charge_cat) %>%
+        filter(!is.na(charge_cat))
       
       output$charge_count_str <- renderText(data %>% pull(N) %>%sum() %>% scales::comma())
       
@@ -985,6 +986,78 @@ function(input, output, session) {
         
       } else {
         # If there are no stops for the filter
+        empty_plotly("charges")
+      }
+      
+    })
+    
+    # Drug class -----------------------------------------------------------------
+    
+    class_values <- reactiveValues(agency = NULL)
+    
+    observeEvent(input$class_button, {
+      
+      class_values$town <- input$class_city
+      class_values$agency <- input$class_dept
+      class_values$court <- input$class_court
+      class_values$disp <- input$class_disp
+      
+      results <- filter_and_get_label(
+        combined94c_data, 
+        town = class_values$town,
+        agency = class_values$agency,
+        crt = class_values$court,
+        disp = class_values$disp)
+      
+      data <- results[[1]]
+      class_values$data <- data
+      
+      class_values$label <- results[[2]]
+      
+    })
+    
+    output$class_v_time <- renderPlotly({
+      
+      validate(
+        need(class_values$agency, 'Please select filters and press "Go."')
+      )
+      
+      data <- class_values$data %>%
+        mutate(has_class = str_detect(charge_subcat, "Class"),
+               class = str_extract(charge_subcat, "Class [A-E]"),
+               x=file_year) %>%
+        filter(has_class, x <= 2014) %>%
+        count(class, x, name="N") %>%
+        pivot_wider(names_from=matches("class"), values_from=matches("N"))
+      
+      if (nrow(data) > 0) {
+        
+        data %>%
+          plot_ly(hovertemplate = '%{y:,} %{text} charges in %{x}<extra></extra>',
+                  line = list(width=3.5, color="#882255"), x=~x, y=~`Class A`, 
+                  text="Class A", 
+                  name="Class A", type = 'scatter', mode = 'lines', opacity=.7)%>%
+          add_trace(y = ~`Class B`, name = 'Class B', mode = 'lines', text="Class B", 
+                    line = list(width=3.5, color="#0055aa")) %>%
+          add_trace(y = ~`Class C`, name = 'Class C', mode = 'lines', text="Class C",
+                    line = list(width=3.5, color="#DDCC77")) %>%
+          add_trace(y = ~`Class D`, name = 'Class D', mode = 'lines', text="Class D",
+                    line = list(width=3.5, color="#117733")) %>%
+          add_trace(y = ~`Class E`, name = 'Class E', mode = 'lines', text="Class E",
+                    line = list(width=3.5, color="#CC6677")) %>%
+          layout(yaxis = list(title = "Number of charges", zeroline = F),
+                 xaxis = list(title = "Year of filing", zeroline = F),
+                 legend = list(x=100, y=0.5),
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America")),
+                 annotations = list(list(
+                   showarrow = F, opacity = 0.7,
+                   x = .5, xref="paper", xanchor = "center",
+                   y = 1.05, yref="paper",
+                   text = "<i>Click and drag to zoom in on a specific date range</i>"
+                 )))
+        
+      } else {
         empty_plotly("charges")
       }
       

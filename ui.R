@@ -304,6 +304,35 @@ fluidPage(
                 withSpinner(plotlyOutput("charge"), type=4, color="#b5b5b5", size=0.5)
        ),
        
+       # Drug Class ------------------------------------------
+       tabPanel("Drugs by Class", 
+                wellPanel(id="internal_well",
+                          
+                          em("Explore different classes of drug involved in 94C violations over time. Filter the charges with the following criteria:"),
+                          fluidRow(
+                            fluidRow(
+                              column(6, selectizeInput("class_city", "Town/City", c("All cities and towns", all_towns))),
+                              column(6, selectizeInput("class_dept", label="Agency / Department", c("All departments", all_depts)))
+                            ),
+                            fluidRow(
+                              column(6, selectizeInput("class_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(6, selectizeInput("class_disp", label="Disposition", c("All dispositions", all_disps)))
+                            )
+                          ),
+                          actionButton("class_button", "Go")),
+                div(id="class_desc", 
+                    em("Drug class examples from the", a("Massachusetts General Laws", href="https://malegislature.gov/laws/generallaws/parti/titlexv/chapter94c/section31", target="_blank"), ":",
+                tags$ul(
+                  tags$li("Class A - e.g., heroin, fentanyl, ecstacy"),
+                  tags$li("Class B - e.g., cocaine, LSD, methamphetamines, Oxycodone"),
+                  tags$li("Class C - e.g., magic mushrooms, Valium, Vicodin"),
+                  tags$li("Class D - marijuana"),
+                  tags$li("Class E - other prescription drugs"),
+                  ))),
+                withSpinner(plotlyOutput("class_v_time"), type=4, color="#b5b5b5", size=0.5)
+       ),
+       
+       
        # Charges over time ------------------------------------------
        tabPanel("Compare charges over time", 
                 wellPanel(id="internal_well",
