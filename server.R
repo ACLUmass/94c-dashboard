@@ -948,38 +948,17 @@ function(input, output, session) {
       dem_values$data_age <- data$age_at_file
     })
     
-    # Create age histogram 
-    output$demographics_age <- renderPlotly({
+    output$dem_dashboard <- renderUI({
       
       validate(
-        need(dem_values$data_age, '')
+        need(dem_values$data_gender, 'Please select filters and press "Go."')
       ) 
       
-      plot_ly(x = dem_values$data_age, 
-              type = "histogram",
-              nbinsx=50,
-              marker = list(color = "darkgray",
-                            line = list(color = "darkgray",
-                                        width = 2)),
-              hovertemplate = paste('<i>Age</i>: %{x}',
-                                    '<br>Number charged: %{y:,.0f}',
-                                    '<extra></extra>'),
-              height=200) %>%
-        layout(xaxis = list(title = 'Age (years)'), 
-               yaxis = list(title = 'Number of\nindividuals'),
-               showlegend = F,
-               font=list(family = "GT America"),
-               hoverlabel=list(font = list(family = "GT America"))) %>%
-        config(modeBarButtonsToRemove = plotly_modebar_to_remove)
-    })
-    
-    plotly_modebar_to_remove <- c("zoom2d","pan2d","select2d","lasso2d","zoomIn2d","zoomOut2d","autoScale2d")
+      plotly_modebar_to_remove <- c("zoom2d","pan2d","select2d","lasso2d",
+                                    "zoomIn2d","zoomOut2d","autoScale2d")
     
     # Create gender bar plot
     output$demographics_gender <- renderPlotly({
-      validate(
-        need(dem_values$data_gender, 'Please select filters and press "Go."')
-      )  
       
       dem_values$data_gender %>%
         ggplot(aes(x=0, y=-N, 
@@ -993,13 +972,40 @@ function(input, output, session) {
         xlim(-.5, .5) +
         theme_void()
       
+        N_m <- dem_values$data_gender %>%
+          filter(gender == "Male") %>%
+          pull(N)
+        N_f <- dem_values$data_gender %>%
+          filter(gender == "Female") %>%
+          pull(N)
+        N_u <- dem_values$data_gender %>%
+          filter(gender == "Unknown") %>%
+          pull(N)
+        
+        N_m <- ifelse(length(N_m) > 0, N_m, 0)
+        N_f <- ifelse(length(N_f) > 0, N_f, 0)
+        N_u <- ifelse(length(N_u) > 0, N_u, 0)
+        
+        m_str <- ifelse(N_m > 0, paste(ifelse(N_m > 1,
+                                              paste(number(N_m, big.mark=","), "charges"),
+                                              "1 charge"),
+                                       "\nto male individuals"),
+                        "No male\nindividuals charged")
+        f_str <-ifelse(N_f > 0, paste(ifelse(N_f > 1,
+                                             paste(number(N_f, big.mark=","), "charges"),
+                                             "1 charge"),
+                                      "\nto female individuals"),
+                       "No female\nindividuals charged")
+        u_str <- ifelse(N_u > 0, paste(ifelse(N_u > 1,
+                                              paste(number(N_u, big.mark=","), "charges"),
+                                              "1 charge"),
+                                       "\nto individuals of\nunknown gender"),
+                        "No individuals\nof unknown gender\ncharged")
+        
       ggplotly(tooltip="text", height=200) %>%
         add_annotations(x = 0,
                         y = .4,
-                        text = paste(number(dem_values$data_gender$N[[1]], big.mark=","), 
-                                     "charges\nto",
-                                     tolower(dem_values$data_gender$gender[[1]]),
-                                     "individuals"),
+                          text = m_str,
                         text_position = "left",
                         xanchor="left",
                         yanchor="top",
@@ -1009,10 +1015,7 @@ function(input, output, session) {
                         yref = "paper") %>%
         add_annotations(x = 1, 
                         y = .6,
-                        text = paste(number(dem_values$data_gender$N[[2]], big.mark=","), 
-                                     "charges\nto",
-                                     tolower(dem_values$data_gender$gender[[2]]),
-                                     "individuals"),
+                          text = f_str,
                         text_position = "inside",
                         xanchor="right", 
                         yanchor="bottom", 
@@ -1022,10 +1025,7 @@ function(input, output, session) {
                         yref = "paper") %>%
         add_annotations(x = 1,
                         y = .4,
-                        text = paste(number(dem_values$data_gender$N[[3]], big.mark=","), 
-                                     "charges\nto",
-                                     tolower(dem_values$data_gender$gender[[3]]),
-                                     "individuals"),
+                          text = u_str,
                         text_position = "inside",
                         xanchor="right",
                         yanchor="top",
@@ -1041,20 +1041,36 @@ function(input, output, session) {
         config(modeBarButtonsToRemove = plotly_modebar_to_remove)
     })
     
+      
+      # Create age histogram 
+      output$demographics_age <- renderPlotly({
+        
+        plot_ly(x = dem_values$data_age, 
+                type = "histogram",
+                nbinsx=50,
+                marker = list(color = "darkgray",
+                              line = list(color = "darkgray",
+                                          width = 2)),
+                hovertemplate = paste('<i>Age</i>: %{x}',
+                                      '<br>Number charged: %{y:,.0f}',
+                                      '<extra></extra>'),
+                height=200) %>%
+          layout(xaxis = list(title = 'Age (years)'), 
+                 yaxis = list(title = 'Number of\nindividuals'),
+                 showlegend = F,
+                 font=list(family = "GT America"),
+                 hoverlabel=list(font = list(family = "GT America"))) %>%
+          config(modeBarButtonsToRemove = plotly_modebar_to_remove)
+      })
+      
     # Create demographics pie chart
     output$demographics <- renderPlotly({
-      
-      validate(
-        need(dem_values$data, '')
-      )
       
       data <- dem_values$data %>%
         arrange(dem)
       
       dem_colors_here <- dem_colors[data$dem]
     
-      if (nrow(data) > 0) {
-        
         data %>%
           plot_ly(sort=F,                 
                   direction = "clockwise",
@@ -1070,12 +1086,24 @@ function(input, output, session) {
                  font=list(family = "GT America"),
                  hoverlabel=list(font = list(family = "GT America")),
                  legend = list(x = 100, y = 0.5))
+      })
         
-      } else {
-        # If there are no stops for the filter
+      output$empty <- renderPlotly({
         empty_plotly("charges")
-      }
+      })
       
+
+      if (nrow(dem_values$data) > 0) {
+        tagList(
+          fluidRow(div(withSpinner(plotlyOutput("demographics_gender"), 
+                                   type=4, color="#b5b5b5", size=0.5), class="col-md-6"), 
+                   div(withSpinner(plotlyOutput("demographics_age"), 
+                                   type=4, color="#b5b5b5", size=0.5), class="col-md-6")),
+          withSpinner(plotlyOutput("demographics"), type=4, color="#b5b5b5", size=0.5)
+        )
+      } else {
+        withSpinner(plotlyOutput("empty"), type=4, color="#b5b5b5", size=0.5)
+      }
     })
 
 #     # Stops by offense ----------------------------------------------------------------

@@ -316,11 +316,7 @@ fluidPage(
                 ),
                 # h2(textOutput("disp_count_str"), align="center"),
                 # p(textOutput("disp_str", inline=T), align="center"),
-                fluidRow(div(withSpinner(plotlyOutput("demographics_gender"), 
-                                               type=4, color="#b5b5b5", size=0.5), class="col-md-6"), 
-                         div(withSpinner(plotlyOutput("demographics_age"), 
-                                               type=4, color="#b5b5b5", size=0.5), class="col-md-6")),
-                withSpinner(plotlyOutput("demographics"), type=4, color="#b5b5b5", size=0.5)
+                withSpinner(uiOutput("dem_dashboard"), type=4, color="#b5b5b5", size=0.5)
        )
        
        
