@@ -59,6 +59,7 @@ body {
 #title h2 {
   display:inline;
   margin-left: 5%;
+  -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
 

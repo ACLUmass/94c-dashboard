@@ -166,7 +166,7 @@ fluidPage(
                 
                 h3("Source Code"),
                 p("Interested programmers can view the source code for this app, written in R, on",
-                  a("GitHub.", href="https://github.com/ACLUmass/94c-dashboard")),
+                  a("GitHub.", href="https://github.com/ACLUmass/94c-dashboard", target="_blank")),
        br(),br()
        ),
        
@@ -244,8 +244,7 @@ fluidPage(
                              a(icon("info-circle"),
                                id="log_tooltip",
                                `data-toggle`="tooltip",
-                               title=log_tooltip_html))),
-                        value=T),
+                               title=log_tooltip_html)), value=T)),
           tabsetPanel(id="map_tabs",
                        
             tabPanel("Total Charges",
