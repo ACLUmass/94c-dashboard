@@ -1047,6 +1047,22 @@ function(input, output, session) {
         output$disp_count_str <- renderText(data %>% pull(N) %>%sum() %>% scales::comma())
         
         disp_colors_here <- disp_colors[data$disposition_cat]
+        
+        if (input$screen_width > 767) {
+          legend_x <- 100
+          legend_y <- 0.5
+          xanchor <- "left"
+          yanchor <- "center"
+          orientation <- "v"
+          height <- 400
+        } else {
+          legend_x <- .5
+          legend_y <- -0.05
+          xanchor <- "center"
+          yanchor <- "top"
+          orientation <- "h"
+          height <- 450
+        }
 
         if (nrow(data) > 0) {
           
@@ -1056,7 +1072,8 @@ function(input, output, session) {
                   marker = list(line = list(color = 'lightgrey', width = 1),
                                 colors=disp_colors_here),
                   labels = ~disposition_cat, values = ~N,
-                  textposition = "inside"
+                  textposition = "inside",
+                  height = height
                   ) %>%
             add_pie(hovertemplate = '<i>Disposition</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
               layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
@@ -1064,7 +1081,9 @@ function(input, output, session) {
                      showlegend = TRUE,
                      font=list(family = "GT America"),
                      hoverlabel=list(font = list(family = "GT America")),
-                     legend = list(x = 100, y = 0.5))
+                     legend = list(x = legend_x, y = legend_y, 
+                                   xanchor = xanchor, yanchor = yanchor,
+                                   orientation = orientation))
           
         } else {
             # If there are no stops for the filter
@@ -1143,6 +1162,22 @@ function(input, output, session) {
       
       charge_colors_here <- charge_colors[data$charge_cat]
       
+      if (input$screen_width > 767) {
+        legend_x <- 100
+        legend_y <- 0.5
+        xanchor <- "left"
+        yanchor <- "center"
+        orientation <- "v"
+        height <- 400
+      } else {
+        legend_x <- .5
+        legend_y <- -0.05
+        xanchor <- "center"
+        yanchor <- "top"
+        orientation <- "h"
+        height <- 450
+      }
+      
       if (nrow(data) > 0) {
         
         data %>%
@@ -1151,7 +1186,8 @@ function(input, output, session) {
                   marker = list(line = list(color = 'lightgrey', width = 1),
                                 colors=charge_colors_here),
                   labels = ~charge_cat, values = ~N,
-                  textposition = "inside"
+                  textposition = "inside",
+                  height = height
           ) %>%
           add_pie(hovertemplate = '<i>Charge</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
           layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
@@ -1159,7 +1195,9 @@ function(input, output, session) {
                  showlegend = TRUE,
                  font=list(family = "GT America"),
                  hoverlabel=list(font = list(family = "GT America")),
-                 legend = list(x = 100, y = 0.5))
+                 legend = list(x = legend_x, y = legend_y,
+                               xanchor = xanchor, yanchor = yanchor,
+                               orientation = orientation))
         
       } else {
         # If there are no stops for the filter
@@ -1459,6 +1497,50 @@ function(input, output, session) {
       dem_values$data_age <- data$age_at_file
     })
     
+    # Create demographics pie chart
+    output$demographics <- renderPlotly({
+      
+      data <- dem_values$data %>%
+        arrange(dem)
+      
+      dem_colors_here <- dem_colors[data$dem]
+      
+      if (input$screen_width > 767) {
+        legend_x <- 100
+        legend_y <- 0.5
+        xanchor <- "left"
+        yanchor <- "center"
+        orientation <- "v"
+        height <- 400
+      } else {
+        legend_x <- .5
+        legend_y <- -0.05
+        xanchor <- "center"
+        yanchor <- "top"
+        orientation <- "h"
+        height <- 450
+      }
+      
+      data %>%
+        plot_ly(sort=F,                 
+                direction = "clockwise",
+                marker = list(line = list(color = 'lightgrey', width = 1),
+                              colors=dem_colors_here),
+                labels = ~dem, values = ~N,
+                textposition = "inside",
+                height = height
+        ) %>%
+        add_pie(hovertemplate = '<i>Gender</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
+        layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               showlegend = TRUE,
+               font=list(family = "GT America"),
+               hoverlabel=list(font = list(family = "GT America")),
+               legend = list(x = legend_x, y = legend_y,
+                             xanchor = xanchor, yanchor = yanchor,
+                             orientation = orientation))
+    })
+    
     output$dem_dashboard <- renderUI({
       
       validate(
@@ -1467,6 +1549,8 @@ function(input, output, session) {
       
       plotly_modebar_to_remove <- c("zoom2d","pan2d","select2d","lasso2d",
                                     "zoomIn2d","zoomOut2d","autoScale2d")
+      
+      
       
       # Create gender bar plot
       output$demographics_gender <- renderPlotly({
@@ -1572,31 +1656,6 @@ function(input, output, session) {
                  font=list(family = "GT America"),
                  hoverlabel=list(font = list(family = "GT America"))) %>%
           config(modeBarButtonsToRemove = plotly_modebar_to_remove)
-      })
-      
-      # Create demographics pie chart
-      output$demographics <- renderPlotly({
-        
-        data <- dem_values$data %>%
-          arrange(dem)
-        
-        dem_colors_here <- dem_colors[data$dem]
-          
-        data %>%
-          plot_ly(sort=F,                 
-                  direction = "clockwise",
-                  marker = list(line = list(color = 'lightgrey', width = 1),
-                                colors=dem_colors_here),
-                  labels = ~dem, values = ~N,
-                  textposition = "inside"
-          ) %>%
-          add_pie(hovertemplate = '<i>Gender</i>: %{label}<br>%{value} charges (%{percent})<extra></extra>') %>%
-          layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 showlegend = TRUE,
-                 font=list(family = "GT America"),
-                 hoverlabel=list(font = list(family = "GT America")),
-                 legend = list(x = 100, y = 0.5))
       })
       
       output$empty <- renderPlotly({

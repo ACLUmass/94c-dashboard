@@ -92,6 +92,18 @@ fluidPage(
               });
          });'
     )),
+  
+    # Add javascript for measuring screen width
+    tags$script('var screen_width = 0;
+                $(document).on("shiny:connected", function(e) {
+                    screen_width = window.innerWidth;
+                    Shiny.onInputChange("screen_width", screen_width);
+                });
+                $(window).resize(function(e) {
+                    screen_width = window.innerWidth;
+                    Shiny.onInputChange("screen_width", screen_width);
+                });
+            '),
     
     # App title
     div(id="title",

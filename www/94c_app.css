@@ -97,6 +97,7 @@ label {
 .col-sm-9 {
   padding-top: 2rem;
   background-color: white;
+  padding-bottom: 3rem;
 }
 
 /* Extend green color */
@@ -520,3 +521,10 @@ div[data-value="Compare stops over time"] label span {
   margin-right: auto;
   width: fit-content;
 }
+
+div[data-value="Disposition"] .shiny-spinner-output-container,
+div[data-value="Charge Type"] .shiny-spinner-output-container,
+#demographics {
+  height: 450px;
+}
+
