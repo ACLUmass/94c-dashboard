@@ -52,6 +52,15 @@ combined94c_data <- combined94c_data %>%
     T ~ paste(department, "PD")
   ),
   jurisdiction = case_when(
+    jurisdiction == "North Attleboro" ~ "N Attleborough",
+    str_starts(jurisdiction, "East ") ~ str_replace(jurisdiction, "East ", "E "),
+    str_starts(jurisdiction, "West ") ~ str_replace(jurisdiction, "West ", "W "),
+    str_starts(jurisdiction, "North ") ~ str_replace(jurisdiction, "North ", "N "),
+    str_starts(jurisdiction, "South ") ~ str_replace(jurisdiction, "South ", "S "),
+    str_starts(jurisdiction, "Mount ") ~ str_replace(jurisdiction, "Mount ", "Mt "),
+    str_starts(jurisdiction, "Great ") ~ str_replace(jurisdiction, "Great ", "Gt "),
+    jurisdiction == "Lunenberg" ~ "Lunenburg",
+    jurisdiction == "Manchester" ~ "Manchester-By-The-Sea",
     jurisdiction == "(DO NOT USE) Middleton" ~ "Middleton",
     is.na(jurisdiction) ~ "Not Listed",
     T ~ jurisdiction
@@ -701,7 +710,6 @@ function(input, output, session) {
         combined94c_data, 
         agency = input$map_dept,
         crt = input$map_court,
-        chrg = input$map_charge,
         year_type = input$map_yr_type,
         start_year=input$map_start_year,
         end_year=input$map_end_year)
@@ -710,18 +718,6 @@ function(input, output, session) {
       # label <- results[[2]]
 
         charges_sf <- data[, .N, jurisdiction] %>%
-            mutate(jurisdiction = case_when(
-              jurisdiction == "North Attleboro" ~ "N Attleborough",
-              str_starts(jurisdiction, "East ") ~ str_replace(jurisdiction, "East ", "E "),
-              str_starts(jurisdiction, "West ") ~ str_replace(jurisdiction, "West ", "W "),
-              str_starts(jurisdiction, "North ") ~ str_replace(jurisdiction, "North ", "N "),
-              str_starts(jurisdiction, "South ") ~ str_replace(jurisdiction, "South ", "S "),
-              str_starts(jurisdiction, "Mount ") ~ str_replace(jurisdiction, "Mount ", "Mt "),
-              str_starts(jurisdiction, "Great ") ~ str_replace(jurisdiction, "Great ", "Gt "),
-              jurisdiction == "Lunenberg" ~ "Lunenburg",
-              jurisdiction == "Manchester" ~ "Manchester-By-The-Sea",
-              T ~ jurisdiction
-            )) %>%
             merge(ma_towns, by.y = "town", by.x = "jurisdiction", all=T) %>%
             filter(!is.na(pop)) %>%
             mutate(N= replace_na(N, 0)) %>% # Fill in 0s for towns with no stops
@@ -729,22 +725,37 @@ function(input, output, session) {
             st_as_sf() %>%
             st_transform('+proj=longlat +datum=WGS84')
         
-        if (input$map_radio == "Charges per capita") {
-          charges_sf <- charges_sf %>%
-                mutate(N = (N / pop) * 1e3)
-        }
+        charge_types_sf <- data[, .N, .(jurisdiction, charge_cat)] %>%
+          # combined94c_data[, .N, .(jurisdiction, charge_cat)] %>%
+          merge(ma_towns, by.y = "town", by.x = "jurisdiction", all=T) %>%
+          filter(!is.na(pop)) %>%
+          mutate(N= replace_na(N, 0)) %>% # Fill in 0s for towns with no stops
+          select(-TOWN, town=jurisdiction) %>%
+          st_as_sf() %>%
+          st_transform('+proj=longlat +datum=WGS84') %>%
+          group_by(town) %>%
+          mutate(TotalCharges = sum(N)) %>%
+          ungroup() %>%
+          filter(charge_cat == "Possession") %>%
+          mutate(pct = N / TotalCharges) %>%
+          mutate(pct = pct*100)
 
         charges_map$data <- charges_sf
-        charges_map$log <- input$map_log
-        charges_map$percap <- input$map_radio
+        charges_map$type_data <- charge_types_sf
+        # charges_map$log <- input$map_log
+        # charges_map$percap <- input$map_radio
     })
 
     # Replace legend labels with custom format
-    stopsLabelFormat = function(..., log){
+    stopsLabelFormat = function(..., log, pct=F){
         if (log) {
             function(type = "numeric", cuts){
                 10**as.numeric(cuts) %>%
                     scales::number(big.mark=",", accuracy=1)
+            }
+        } else if (pct) {
+            function(type = "numeric", cuts){
+              scales::percent(cuts/100, accuracy=.1)
             }
         } else {
             labelFormat(...)
@@ -755,23 +766,20 @@ function(input, output, session) {
         validate(
             need(charges_map$data, 'Please select date range and press "Go."')
         )
+      
+      data <- charges_map$data %>%
+        filter(N > 0)
 
-        palette_domain <- if (charges_map$log) log10(charges_map$data$N) else charges_map$data$N
+        palette_domain <- if (input$map_log) log10(data$N) else data$N
         palette_domain <- replace(palette_domain,
                                   palette_domain == -Inf, NA)
 
-        if (charges_map$percap == "Total charges") {
-            legend_title <- "<a style='font-family:GT America; color: dimgrey'>Total <br> 94C charges</a>"
-            label_accuracy <- 1
-            label_suffix <- ""
-        } else {
-            legend_title <- "<a style='font-family:GT America; color: dimgrey'>94C charges<br>per 1,000</a>"
-            label_accuracy <- 1
-            label_suffix <- " per 1,000 population"
-        }
+        legend_title <- "<a style='font-family:GT America; color: dimgrey'>Total <br> 94C charges</a>"
+        label_accuracy <- 1
+        label_suffix <- ""
 
         pal_total_stops <- colorNumeric(
-            palette = "inferno",
+            palette = "Greens",#"inferno",
             domain = palette_domain,
             na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
         )
@@ -783,37 +791,37 @@ function(input, output, session) {
         )
         
         pal_total_stops_noNA <- colorNumeric(
-            palette = "inferno",
+            palette = "Greens",#"inferno",
             domain = palette_domain,
             na.color = NA
         )
         
-        one_town <- charges_map$data %>%
+        one_town <- data %>%
           filter(N != 0) %>%
           nrow() == 1
           
         leaflet(options = leafletOptions(attributionControl = T)) %>%
             addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
-            addPolygons(data = charges_map$data,
+            addPolygons(data = data,
                         fillOpacity = 0.8,
                         weight = 1,
-                        fillColor = if (one_town & charges_map$log) {
+                        fillColor = if (one_town & input$map_log) {
                           ~pal_one_town(N)
-                        } else if (charges_map$log) {
+                        } else if (input$map_log) {
                           ~pal_total_stops(log10(N))
                         } else {
                           ~pal_total_stops(N)
                         },
-                        stroke=F,
+                        stroke=T,
                         smoothFactor=.5,
                         label = ~lapply(paste0("<b>", town, "</b></br>",
                                                scales::number(N, big.mark=",", accuracy=label_accuracy), " charges", label_suffix),
                                         htmltools::HTML),
-                        color="none",
+                        color="grey",
                         group="poly")  %>%
             addLegend(pal = pal_total_stops_noNA,
                       values = palette_domain,
-                      labFormat = stopsLabelFormat(log=charges_map$log),
+                      labFormat = stopsLabelFormat(log=input$map_log),
                       position = "topright",
                       title = legend_title,
             )  %>%
@@ -825,6 +833,150 @@ function(input, output, session) {
                }"))) %>%
             addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>",
                        "bottomleft", className="logo-control")
+    })
+    
+    output$charges_by_town_percap <- renderLeaflet({
+      validate(
+        need(charges_map$data, 'Please select date range and press "Go."')
+      )
+      
+      data <- charges_map$data %>%
+        mutate(N = (N / pop) * 1e3) %>% 
+        filter(N > 0)
+      
+      palette_domain <- if (input$map_log) log10(data$N) else data$N
+      palette_domain <- replace(palette_domain,
+                                palette_domain == -Inf, NA)
+      
+      legend_title <- "<a style='font-family:GT America; color: dimgrey'>94C charges<br>per 1,000</a>"
+      label_accuracy <- 1
+      label_suffix <- " per 1,000 population"
+      
+      pal_total_stops <- colorNumeric(
+        palette = "Greens",#inferno",
+        domain = palette_domain,
+        na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
+      )
+      
+      pal_one_town <- colorNumeric(
+        palette = c("#bbbbbb", "red"),
+        domain = c(0, max(palette_domain, na.rm=T)),
+        na.color = viridis_pal(option="inferno")(10) %>% tail(1)
+      )
+      
+      pal_total_stops_noNA <- colorNumeric(
+        palette = "Greens",#"inferno",
+        domain = palette_domain,
+        na.color = NA
+      )
+      
+      one_town <- data %>%
+        filter(N != 0) %>%
+        nrow() == 1
+      
+      leaflet(options = leafletOptions(attributionControl = T)) %>%
+        addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+        addPolygons(data = data,
+                    fillOpacity = 0.8,
+                    weight = 1,
+                    fillColor = if (one_town & input$map_log) {
+                      ~pal_one_town(N)
+                    } else if (input$map_log) {
+                      ~pal_total_stops(log10(N))
+                    } else {
+                      ~pal_total_stops(N)
+                    },
+                    stroke=T,
+                    smoothFactor=.5,
+                    label = ~lapply(paste0("<b>", town, "</b></br>",
+                                           scales::number(N, big.mark=",", accuracy=label_accuracy), " charges", label_suffix),
+                                    htmltools::HTML),
+                    color="grey",
+                    group="poly")  %>%
+        addLegend(pal = pal_total_stops_noNA,
+                  values = palette_domain,
+                  labFormat = stopsLabelFormat(log=input$map_log),
+                  position = "topright",
+                  title = legend_title,
+        )  %>%
+        addEasyButton(easyButton(
+          icon="fa-home", title="Reset",
+          onClick=JS("function(btn, map){
+                   var groupLayer = map.layerManager.getLayerGroup('poly');
+                   map.fitBounds(groupLayer.getBounds());
+               }"))) %>%
+        addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>",
+                   "bottomleft", className="logo-control")
+    })
+    
+    output$charge_types_by_town <- renderLeaflet({
+      validate(
+        need(charges_map$type_data, 'Please select date range and press "Go."')
+      )
+      
+      data <- charges_map$type_data
+      
+      palette_domain <- 0:100
+      
+      legend_title <- paste0("<a style='font-family:GT America; color: dimgrey'>What percentage of <br>94C charges were<br>for drug possession?</a>")
+      
+      pal_total_stops <- colorNumeric(
+        # palette = "inferno",
+        palette = "Greens",
+        domain = palette_domain,
+        na.color = "#bbbbbb"#viridis_pal(option="inferno")(10) %>% head(1)
+      )
+      
+      pal_one_town <- colorNumeric(
+        palette = c("#bbbbbb", "red"),
+        domain = c(0, max(palette_domain, na.rm=T)),
+        na.color = viridis_pal(option="inferno")(10) %>% tail(1)
+      )
+      
+      pal_total_stops_noNA <- colorNumeric(
+        # palette = "inferno",s
+        palette = "Greens",
+        domain = palette_domain,
+        na.color = NA
+      )
+      
+      one_town <- data %>%
+        filter(pct != 0) %>%
+        nrow() == 1
+      
+      leaflet(options = leafletOptions(attributionControl = T)) %>%
+        addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+        addPolygons(data = data,
+                    fillOpacity = 0.8,
+                    weight = 1,
+                    fillColor = if (one_town) {
+                      print("one town log")
+                      ~pal_one_town(pct)
+                    } else {
+                      print("none")
+                      ~pal_total_stops(pct)
+                    },
+                    stroke=T,
+                    smoothFactor=.5,
+                    label = ~lapply(paste0("<b>", town, "</b></br>",
+                                           scales::percent(pct/100, accuracy=.1), " charges for drug possession"),
+                                    htmltools::HTML),
+                    color="grey",
+                    group="poly")  %>%
+        addLegend(pal = pal_total_stops_noNA,
+                  values = palette_domain,
+                  labFormat = stopsLabelFormat(log=F, pct=T),
+                  position = "topright",
+                  title = legend_title,
+        )  %>%
+        addEasyButton(easyButton(
+          icon="fa-home", title="Reset",
+          onClick=JS("function(btn, map){
+                   var groupLayer = map.layerManager.getLayerGroup('poly');
+                   map.fitBounds(groupLayer.getBounds());
+               }"))) %>%
+        addControl("<img src='Logo_White_CMYK_Massachusetts.png' style='max-width:100px;'>",
+                   "bottomleft", className="logo-control")
     })
      
     # Disposition -----------------------------------------------------------------

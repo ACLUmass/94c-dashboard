@@ -136,6 +136,68 @@ label {
   color: #00343a;
 }
 
+/* Map Tabs */
+/*
+#map_tabs {
+  border-right: 1px solid #ddd;
+  height: 477px;
+  display: block;
+}
+
+#map_tabs > li > a {
+  color: inherit;
+}
+
+#map_tabs > li.active > a {
+  background-color: white;
+  font-style: italic;
+  border: 1px solid #ddd;
+  border-top-left-radius: 4px;
+  border-right: none;
+  border-bottom-left-radius: 4px;
+  cursor: default;
+  margin-right: -1px;
+}
+
+.col-sm-4.well {
+  border: none;
+  background-color: white;
+  box-shadow: none;
+  padding: 0;
+  padding-left: 3rem;
+}
+
+.col-sm-8 {
+  border: 1px solid #ddd;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  margin-bottom: 3rem;
+  border-left: none;
+}
+*/
+/*
+#charge_types_by_town {
+  margin-top: 35px;
+}*/
+
+ #map_tabs > li > a:hover {
+  background-color: #a7d7b563;
+  border-bottom-color:transparent;
+}
+
+#map_tabs #tab-content {
+  margin-left: 1rem;
+}
+
+.tabbable .shiny-spinner-output-container {
+  margin: 2rem;
+}
+
+#map_log_div .form-group {
+  width:100%;
+  text-align:center;
+}
+
 h1, h2, h3, h4 {
   text-transform: uppercase;
   font-weight: bold;

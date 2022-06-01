@@ -219,37 +219,39 @@ fluidPage(
        tabPanel("Mapping Charges",
           wellPanel(id="internal_well",
              em("Explore the 94C charges across Massachusetts. Filter the charges with the following criteria:"),
-             fluidRow(
                fluidRow(
-               column(4,
+               column(6,
                  selectizeInput("map_dept", label="Agency / Department", c("All departments", all_depts))),
-               column(4, selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts))),
-               column(4, selectizeInput("map_charge", label="Charge", c("All charges", all_charges)))),
+               column(6, selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts)))),
                fluidRow(
                  column(4, selectizeInput("map_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
                  column(4, numericInput("map_start_year", "Start Year",
                               value = "2000", min="2000", max="2018")),
                  column(4, numericInput("map_end_year", "End Year",
                               value = "2014", min="2000", max="2018"))),
-               fluidRow(
-                 column(6, radioButtons("map_radio", "Value Type",
-                              choiceValues=c("Total charges",
-                                        "Charges per capita"),
-                              choiceNames=c("Total charges",
-                                             "Charges per 1,000 population"),
-                              selected="Total charges", inline=F)),
-                 column(6, div(id="map_log_span",
-                     div(tags$b("Numeric Scale")),
-                      checkboxInput("map_log",
-                                    span("Plot logarithmic scale",
-                                         a(icon("info-circle"),
-                                           id="log_tooltip",
-                                           `data-toggle`="tooltip",
-                                           title=log_tooltip_html)),
-                                    value=T)
-                      )))),
-               actionButton("map_button", "Go")),
-         withSpinner(leafletOutput("charges_by_town"), type=4, color="#b5b5b5", size=0.5)
+                actionButton("map_button", "Go")),
+          div(id="map_log_div", checkboxInput("map_log",
+                        span("Plot logarithmic scale",
+                             a(icon("info-circle"),
+                               id="log_tooltip",
+                               `data-toggle`="tooltip",
+                               title=log_tooltip_html))),
+                        value=T),
+          tabsetPanel(id="map_tabs",
+                       
+            tabPanel("Total Charges",
+                     withSpinner(leafletOutput("charges_by_town"), 
+                                 type=4, color="#b5b5b5", size=0.5)
+            ),
+            tabPanel("Charges per 1,000",
+                     withSpinner(leafletOutput("charges_by_town_percap"), 
+                                 type=4, color="#b5b5b5", size=0.5)
+            ),
+            tabPanel("Prosecuting Possession",
+                     withSpinner(leafletOutput("charge_types_by_town"), 
+                                 type=4, color="#b5b5b5", size=0.5)
+            )
+          )
        ),
        
        # Disposition ------------------------------------------
