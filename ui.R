@@ -37,15 +37,6 @@ court_names <- data.frame(all_courts) %>%
 
 names(all_courts) <- court_names
 
-# all_agencies <- readRDS("data/all_agencies.RDS")
-# all_towns <- readRDS("data/all_towns.rds")
-# 
-# all_outcomes <- c("All outcomes"="All outcomes", 
-#                   "Warning"="Warn", 
-#                   "Civil Citation"="Civil",
-#                   "Criminal Citation"="Crim", 
-#                   "Arrest"="Arrest")
-# 
 log_tooltip_html <- "
 <div id='log-tooltip' width=20px>
     <b>What is a logarithmic scale?</b>
@@ -56,11 +47,17 @@ log_tooltip_html <- "
 </div>
 "
 
-# officer_tooltip_html <- "
-# <div id='officer-id-tooltip' width=20px>
-#     The format of officer identifiers varies widely between law enforcement agencies - some agencies just use numbers, some include letters, etc. The options presented here reflect the IDs exactly as reported by MassDOT. We anticipate some may be typos.
-# </div>
-# "
+yr_tooltip_html <- "
+<div id='yr-tooltip' width=20px>
+    <p>You may filter the charge data based on four different years reported by the Court:</p>
+    <ul>
+      <li><i>Offense</i> - the year in which the  offense leading to the charge allegedly took place</li>
+      <li><i>Arrest</i> - the year in which the arrest leading to the charge took place</li>
+      <li><i>Filing</i> - the year in which the charge was filed</li>
+      <li><i>Disposition</i> - the year in which the charge outcome was decided (e.g., dismissed, convicted, acquitted)</li>
+    </ul>
+</div>
+"
 
 # Initialization --------------------------------------------------------------
 
@@ -236,7 +233,7 @@ fluidPage(
                  selectizeInput("map_dept", label="Agency / Department", c("All departments", all_depts))),
                column(6, selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts)))),
                fluidRow(
-                 column(4, selectizeInput("map_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                 column(4, selectizeInput("map_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
                  column(4, numericInput("map_start_year", "Start Year",
                               value = "2000", min="2000", max="2018")),
                  column(4, numericInput("map_end_year", "End Year",
@@ -280,7 +277,8 @@ fluidPage(
                       column(6, selectizeInput("disp_charge", label="Charge", c("All charges", all_charges)))
                     ),
                   fluidRow(
-                      column(4, selectizeInput("disp_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                      column(4, selectizeInput("disp_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), 
+                                               c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
                       column(4 ,numericInput("disp_start_year", "Start Year",
                                 value = "2000", min="2000", max="2018")),
                       column(4, numericInput("disp_end_year", "End Year",
@@ -306,7 +304,7 @@ fluidPage(
                               column(6, selectizeInput("charge_disp", label="Disposition", c("All dispositions", all_disps)))
                             ),
                             fluidRow(
-                              column(4, selectizeInput("charge_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                              column(4, selectizeInput("charge_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
                               column(4 ,numericInput("charge_start_year", "Start Year",
                                                      value = "2000", min="2000", max="2018")),
                               column(4, numericInput("charge_end_year", "End Year",
@@ -380,7 +378,7 @@ fluidPage(
                               selectizeInput("time_charge2", label="Charge", c("All charges", all_charges))
                             )),
                           actionButton("time_button", "Go")),
-                radioButtons("year_type", "Plot by year of:", choices=c("Arrest", "Disposition", "Filing", "Offense"), 
+                radioButtons("year_type", HTML(paste0('Plot by year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), choices=c("Arrest", "Disposition", "Filing", "Offense"), 
                              selected="Filing", inline=T),
                 withSpinner(plotlyOutput("stops_v_time"), type=4, color="#b5b5b5", size=0.5)
        ),
@@ -400,7 +398,7 @@ fluidPage(
                               column(4, selectizeInput("dem_disp", label="Disposition", c("All dispositions", all_disps)))
                             ),
                             fluidRow(
-                              column(4, selectizeInput("dem_yr_type", label="Year of...", c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
+                              column(4, selectizeInput("dem_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
                               column(4, numericInput("dem_start_year", "Start Year",
                                            value = "2000", min="2000", max="2018")),
                               column(4, numericInput("dem_end_year", "End Year",
