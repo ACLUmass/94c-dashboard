@@ -328,15 +328,15 @@ div[data-value="Compare stops over time"] label span {
   text-align: center;
 }
 
-#log-tooltip p, #yr-tooltip p {
+#log-tooltip p, #yr-tooltip p, #disp-tooltip p {
     font-weight: 400;
 }
 
-#log-tooltip, #yr-tooltip{
+#log-tooltip, #yr-tooltip, #disp-tooltip {
   font-family: gtam;
 }
 
-#yr-tooltip ul {
+#yr-tooltip ul, #disp-tooltip ul {
   padding-left: 1rem;
   font-style: inherit;
 }

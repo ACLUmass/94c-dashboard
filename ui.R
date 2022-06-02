@@ -59,6 +59,17 @@ yr_tooltip_html <- "
 </div>
 "
 
+disp_tooltip_html <- "
+<div id='disp-tooltip' width=20px>
+    <p>'Disposition' is the legal term for how a criminal case in Massachusetts is resolved.</p>
+    <p>Many dispositions are intuitive, like charges being dismissed, the defendant being judged guilty, or the defendant being judged not guilty. However, Massachusetts courts also commonly determine cases with less intuitive dispositions:</p>
+    <ul>
+      <li><i>Continuance Without a Finding (CWOF)</i> - [def here]</li>
+      <li><i>Nolle Prosequi</i> - [def here]</li>
+    </ul>
+</div>
+"
+
 # Initialization --------------------------------------------------------------
 
 # Set ggplot settings
@@ -195,7 +206,8 @@ fluidPage(
                                      value = 2014, min=2003, max=2014))),
                       # actionButton("DA_button", "Go"))),
             column(6, withSpinner(div(leafletOutput("DA_map"), 
-                                      em("Click on district to display DA statistics."), style="text-align: center;"), 
+                                      em("Click on district to display DA statistics."), 
+                                      style="text-align: center;"), 
                                   type=4, color="#b5b5b5", size=0.5))),
           withSpinner(uiOutput("DA_dashboard"), type=4, color="#b5b5b5", size=0.5)
           ),
@@ -265,7 +277,7 @@ fluidPage(
        # Disposition ------------------------------------------
        tabPanel("Disposition", 
                 wellPanel(id="internal_well",
-                          em("Explore the dispositions (outcomes) of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
+                          em("Explore the dispositions", HTML(paste0('<a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), " of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
                   fluidRow(
                     fluidRow(
                       column(6, selectizeInput("disp_city", "Town/City", c("All cities and towns", all_towns))),
@@ -300,7 +312,7 @@ fluidPage(
                             ),
                             fluidRow(
                               column(6, selectizeInput("charge_court", "Court", c("All courts"="All courts", all_courts))),
-                              column(6, selectizeInput("charge_disp", label="Disposition", c("All dispositions", all_disps)))
+                              column(6, selectizeInput("charge_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
                             fluidRow(
                               column(4, selectizeInput("charge_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
@@ -327,7 +339,7 @@ fluidPage(
                             ),
                             fluidRow(
                               column(6, selectizeInput("class_court", "Court", c("All courts"="All courts", all_courts))),
-                              column(6, selectizeInput("class_disp", label="Disposition", c("All dispositions", all_disps)))
+                              column(6, selectizeInput("class_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             )
                           ),
                           actionButton("class_button", "Go")),
@@ -356,7 +368,7 @@ fluidPage(
                             ),
                             fluidRow(
                               column(6, selectizeInput("time_court", "Court", c("All courts"="All courts", all_courts))),
-                              column(6, selectizeInput("time_disp", label="Disposition", c("All dispositions", all_disps)))
+                              column(6, selectizeInput("time_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
                             selectizeInput("time_charge", label="Charge", c("All charges", all_charges))
                           ),
@@ -372,20 +384,21 @@ fluidPage(
                               ),
                               fluidRow(
                                 column(6, selectizeInput("time_court2", "Court", c("All courts"="All courts", all_courts))),
-                                column(6, selectizeInput("time_disp2", label="Disposition", c("All dispositions", all_disps)))
+                                column(6, selectizeInput("time_disp2", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                               ),
                               selectizeInput("time_charge2", label="Charge", c("All charges", all_charges))
                             )),
                           actionButton("time_button", "Go")),
                 radioButtons("year_type", HTML(paste0('Plot by year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), choices=c("Arrest", "Disposition", "Filing", "Offense"), 
                              selected="Filing", inline=T),
-                withSpinner(plotlyOutput("stops_v_time"), type=4, color="#b5b5b5", size=0.5)
-       ),
+                withSpinner(plotlyOutput("stops_v_time"), type=4, color="#b5b5b5", size=0.5),
+                em("Please note both that (1) the court only provided partial-year data for charges filed after 2014, and (2) there are lags between offense date, arrest date, filing date, and disposition date (e.g., a charge filed in 2003 might have result from a 2002 arrest, and might not be decided until 2006). As such, dropoffs at the beginning or end of the year ranges shown above do not necessarily reflect the entire picture of drug prosecution in those years."), 
+                style="text-align:center;"),
        
        # Demographics  ------------------------------------------
        tabPanel("Demographics", 
                 wellPanel(id="internal_well",
-                          em("Explore the demographics of individuals charged under Chapter 94C in Massachusetts. Filter with the following criteria:"),
+                          em("Explore the age and gender of individuals charged under Chapter 94C in Massachusetts (race was not reported by the Court). Filter with the following criteria:"),
                           fluidRow(
                             fluidRow(
                               column(6, selectizeInput("dem_city", "Town/City", c("All cities and towns", all_towns))),
@@ -394,7 +407,7 @@ fluidPage(
                             fluidRow(
                               column(4, selectizeInput("dem_court", "Court", c("All courts"="All courts", all_courts))),
                               column(4, selectizeInput("dem_charge", label="Charge", c("All charges", all_charges))),
-                              column(4, selectizeInput("dem_disp", label="Disposition", c("All dispositions", all_disps)))
+                              column(4, selectizeInput("dem_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
                             fluidRow(
                               column(4, selectizeInput("dem_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),

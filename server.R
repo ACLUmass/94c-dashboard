@@ -436,23 +436,24 @@ function(input, output, session) {
         output$DA_pie <- renderPlotly({
           
           DA_data %>%
-            mutate(in_scandal = disposition_cat == "Dismissed (Lab Misconduct)") %>%
+            mutate(in_scandal = ifelse(disposition_cat == "Dismissed (Lab Misconduct)", 
+              "Charges dismissed due to scandal", "Other 94C charges")) %>%
             count(in_scandal, name="N") %>%
             arrange(in_scandal) %>%
             plot_ly(sort=F,
                     direction = "clockwise",
                     marker = list(line = list(color = 'lightgrey', width = 1),
-                                  colors=c("black", "#a7d7b5")),
+                                  colors=c("#a7d7b5", "black")),
                     labels = ~in_scandal, values = ~N,
                     textposition = "inside") %>%
             add_pie(hovertemplate = '%{value} charges (%{percent})<extra></extra>') %>%
             layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                   showlegend = F,
+                   showlegend = T,
                    margin = list(l = 20, r = 20),
                    font=list(family = "GT America"),
                    hoverlabel=list(font = list(family = "GT America")),
-                   legend = list(x = 100, y = 0.5))
+                   legend = list(x = .5, y = -0.05, xanchor="center", yanchor="top"))
         })
 
         # Top agencies
@@ -460,12 +461,20 @@ function(input, output, session) {
 
             DA_data %>%
                 filter(!is.na(department)) %>%
-                count(department, name="N") %>%
+                add_count(department, name="N") %>%
+                mutate(was_dismissed = disposition_cat == "Dismissed") %>%
+                filter(was_dismissed) %>%
+                add_count(department, name="N_dismissed") %>%
+                # View()
+                distinct(department, N, N_dismissed) %>%
                 slice_max(N, n=10) %>%
-                mutate(Rank = min_rank(-N),
-                       N = number(N, big.mark=",", accuracy=1)) %>%
+                mutate(pct = N_dismissed / N,
+                       Rank = min_rank(-N),
+                       N = number(N, big.mark=",", accuracy=1),
+                       N_dismissed = paste0(number(N_dismissed, big.mark=",", accuracy=1), " (",
+                                            percent(pct, accuracy=0.1), ")")) %>%
                 head(10) %>%
-                select(Rank, `Agency` = department, `Charges filed`=N)
+                select(Rank, `Agency` = department, `Charges filed`=N, `Charges dismissed*`=N_dismissed)
         })
 
         # Top courts
@@ -504,20 +513,20 @@ function(input, output, session) {
                  em(paste0("District Attorney", if_else(n_DAs > 1, "s: ", ": "), DA_name_str),
               style="text-align: center; display: inline-block; margin-bottom: 1rem;")),
             fluidRow(
-                        column(6, h3(number(scandal_charges, big.mark=","), style="margin:0px;"), 
+                        column(4, h3(number(scandal_charges, big.mark=","), style="margin:0px;"), 
                                h4("charges dismissed due to"), br(), h4(paste("lab scandal in", 
-                                 DA_values$DA_cty, "county")),
+                                 DA_values$DA_cty, "district")),
                         plotlyOutput("DA_pie", height="300px")),
-                column(6, h4("Top Agencies"),
-                    tableOutput("DA_top_agencies")),
-                style="display:inherit;"
+                column(8, h4("Top Agencies"),
+                    tableOutput("DA_top_agencies"),
+                    em("*Dismissed for any reason, not only the lab scandal.")),
+                style="margin-bottom: 3rem;"
             ),
             fluidRow(
                 column(6, h4("Top Courts"),
                     tableOutput("DA_top_courts")),
                 column(6, h4("Most Common Charges"),
-                    tableOutput("DA_top_charges")),
-                style="display:inherit;")
+                    tableOutput("DA_top_charges")))
         )
     })
     
@@ -1265,12 +1274,21 @@ function(input, output, session) {
                  legend = list(x=100, y=0.5),
                  font=list(family = "GT America"),
                  hoverlabel=list(font = list(family = "GT America")),
+                 shapes = list(
+                   list(type="line", x0=2008,x1=2008, y0=0, y1=1,
+                   yref="paper", line = list(color = "#d62728", dash="dash"))),
                  annotations = list(list(
-                   showarrow = F, opacity = 0.7,
-                   x = .5, xref="paper", xanchor = "center",
-                   y = 1.05, yref="paper",
-                   text = "<i>Click and drag to zoom in on a specific date range</i>"
-                 )))
+                     showarrow = F, opacity = 0.7,
+                     x = .5, xref="paper", xanchor = "center",
+                     y = 1.05, yref="paper",
+                     text = "<i>Click and drag to zoom in on a specific date range</i>"
+                   ),
+                   list(text="Marijuana\ndecriminalization",
+                        x=2008,
+                        y=0, yref="paper", textangle=270, 
+                        font = list(family = "GT America", color="#d62728"),
+                        yanchor="bottom", xanchor="right",showarrow=F,
+                        bgcolor="rgba(255,255,255,0.5)")))
         
       } else {
         empty_plotly("charges")
