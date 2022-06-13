@@ -64,8 +64,8 @@ disp_tooltip_html <- "
     <p>'Disposition' is the legal term for how a criminal case in Massachusetts is resolved.</p>
     <p>Many dispositions are intuitive, like charges being dismissed, the defendant being judged guilty, or the defendant being judged not guilty. However, Massachusetts courts also commonly determine cases with less intuitive dispositions:</p>
     <ul>
-      <li><i>Continuance Without a Finding (CWOF)</i> - [def here]</li>
-      <li><i>Nolle Prosequi</i> - [def here]</li>
+      <li><i>Continuance Without a Finding (CWOF)</i> - a disposition that involves the defendant admitting to sufficient facts to support a finding of guilt, but instead of entering a finding of guilt, the court continues the case until a later date and will dismiss it on that date so long as the defendant complies with specific conditions or probation. </li>
+      <li><i>Nolle Prosequi</i> - a notice that the prosecution is abandoning a pending charge.</li>
     </ul>
 </div>
 "
@@ -142,12 +142,17 @@ fluidPage(
        h4("Where did the data come from?"),
        "The data available here are the result of a 2017 lawsuit, brought in response to the misconduct of state drug-lab chemist Sonja Farak and subsequent mishandling by the Massachusetts Attorney General's Office:",
         a(href="https://www.aclum.org/en/cases/committee-public-counsel-services-v-attorney-general",
-          em("Committee for Public Counsel Services (CPCS) v. Attorney General.")),
+          em("Committee for Public Counsel Services (CPCS) v. Attorney General."), target="_blank"),
        
-       "For more information about the drug scandal, see the",
-         a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information"), "or the", 
-         HTML("<a href='https://www.netflix.com/title/80233339'>Netflix documentary <i>How to Fix a Drug Scandal</i></a>."),
+       "The court provided the data to the parties in the case with an express goal: aiding in the identification of defendants whose cases were affected by the drug lab misconduct.",
        #          
+                br(),br(),
+                h4("Woah, what drug scandal?"),
+                "The CPCS lawsuit was the second of two suits resulting from drug lab scandals in Massachusetts; the first involved chemist Annie Dookhan and resulted in the 2012 case", a(em("Bridgeman v. District Attorney for Suffolk County."), href="https://www.aclum.org/en/cases/bridgeman-v-district-attorney-suffolk-county", target="_blank"),
+       "For more information about the scandals, see the",
+       a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information", target="_blank"), "this", a("timeline of events,", href="https://cdn.knightlab.com/libs/timeline3/latest/embed/index.html?source=1be8ugTZsBbTWZrvfQ011dHCnJ2XXpQpwHdMyYGN23eE", target="_blank"), "or the", 
+       HTML("<a href='https://www.netflix.com/title/80233339' target='_blank'>Netflix documentary <i>How to Fix a Drug Scandal</i></a>."),
+       
                 br(),br(),
                 h4("What's included?"),
                 "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset includes information regarding the criminal statute under Chapter 94C applicable to each charge; the years of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
@@ -217,7 +222,10 @@ fluidPage(
                 fluidRow(
                   column(9, p("Over a period of ten years, two state chemists working at Massachusetts engaged in misconduct that called into serious question the accuracy of their tests. State drug lab tests are used to identify confiscated substances and are critical information used to convict those accused of violating drug law. Tests conducted by chemist Sonja Farak between 2004 and 2013 at the Amherst Drug Lab and by Annie Dookhan between 2003 and 2011 at the Hinton State Laboratory were called into question. As a result, the Massachusetts Supreme Judicial Court ordered the dismissal of over 60,000 charges across over 38,000 cases."),
                 p("For more information about the drug scandal, see the",
-                  a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information"), "or the", 
+                  a("Massachusetts Trial Court website,", href="https://www.mass.gov/info-details/drug-lab-cases-information"), 
+                  "this", a("timeline of events,", 
+                            href="https://cdn.knightlab.com/libs/timeline3/latest/embed/index.html?source=1be8ugTZsBbTWZrvfQ011dHCnJ2XXpQpwHdMyYGN23eE", target="_blank"),
+                  "or the", 
                   HTML("<a href='https://www.netflix.com/title/80233339'>Netflix documentary <i>How to Fix a Drug Scandal</i></a>.")), 
                 style="margin-bottom:3rem"),
                 column(3, div(class="scandal_numbers",
@@ -392,8 +400,8 @@ fluidPage(
                 radioButtons("year_type", HTML(paste0('Plot by year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), choices=c("Arrest", "Disposition", "Filing", "Offense"), 
                              selected="Filing", inline=T),
                 withSpinner(plotlyOutput("stops_v_time"), type=4, color="#b5b5b5", size=0.5),
-                em("Please note both that (1) the court only provided partial-year data for charges filed after 2014, and (2) there are lags between offense date, arrest date, filing date, and disposition date (e.g., a charge filed in 2003 might have result from a 2002 arrest, and might not be decided until 2006). As such, dropoffs at the beginning or end of the year ranges shown above do not necessarily reflect the entire picture of drug prosecution in those years."), 
-                style="text-align:center;"),
+                em("Please note both that (1) the court only provided partial-year data for charges filed after 2014, and (2) there are lags between offense date, arrest date, filing date, and disposition date (e.g., a charge filed in 2003 might have result from a 2002 arrest, and might not be decided until 2006). As such, dropoffs at the beginning or end of the year ranges shown above do not necessarily reflect the entire picture of drug prosecution in those years.", 
+                style="text-align:center;")),
        
        # Demographics  ------------------------------------------
        tabPanel("Demographics", 
