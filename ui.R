@@ -14,28 +14,15 @@ disp_cats <- read_csv("data/94c_dispositions.csv")
 
 all_towns <- read_rds("data/all_towns.rds")
 all_depts <- read_rds("data/all_depts.rds")
-all_courts <- combined94c_data[order(court), court] %>%
-  unique()
 all_charges <- charge_cats$charge_cat
 all_disps <- readRDS("data/disp_colors.rds") %>% names()
+all_courts <- read_rds("data/all_courts.rds")
 
 # Define list of counties
 all_DAs <- c("Berkshire", "Bristol", "Cape and Islands", "Essex", 
              "Hampden", "Middlesex", "Norfolk", "Northwestern",
               "Plymouth", "Suffolk", "Worcester")
 
-# Rename courts to be more accessible
-court_names <- data.frame(all_courts) %>%
-  rename(court = all_courts) %>%
-  mutate(court = as.character(court),
-         court_name= case_when(
-    str_detect(court, "BMC") ~ paste0("Boston Municipal Court (", str_remove(court, "BMC "), ")"),
-    str_detect(court, 'Court$', negate=T) ~ paste(str_remove(court, " Criminal"), "Superior Court"), # I did check this was true
-    T ~ court
-  )) %>%
-  pull(court_name)
-
-names(all_courts) <- court_names
 
 log_tooltip_html <- "
 <div id='log-tooltip' width=20px>
@@ -251,7 +238,7 @@ fluidPage(
                fluidRow(
                column(6,
                  selectizeInput("map_dept", label="Agency / Department", c("All departments", all_depts))),
-               column(6, selectizeInput("map_court", "Court", c("All courts"="All courts", all_courts)))),
+               column(6, selectizeInput("map_court", "Court", all_courts))),
                fluidRow(
                  column(4, selectizeInput("map_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("Arrest", "Disposition", "Filing", "Offense"), selected="Filing")),
                  column(4, numericInput("map_start_year", "Start Year",
@@ -292,7 +279,7 @@ fluidPage(
                       column(6, selectizeInput("disp_dept", label="Agency / Department", c("All departments", all_depts)))
                     ),
                     fluidRow(
-                      column(6, selectizeInput("disp_court", "Court", c("All courts"="All courts", all_courts))),
+                      column(6, selectizeInput("disp_court", "Court", all_courts)),
                       column(6, selectizeInput("disp_charge", label="Charge", c("All charges", all_charges)))
                     ),
                   fluidRow(
@@ -319,7 +306,7 @@ fluidPage(
                               column(6, selectizeInput("charge_dept", label="Agency / Department", c("All departments", all_depts)))
                             ),
                             fluidRow(
-                              column(6, selectizeInput("charge_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(6, selectizeInput("charge_court", "Court", all_courts)),
                               column(6, selectizeInput("charge_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
                             fluidRow(
@@ -346,7 +333,7 @@ fluidPage(
                               column(6, selectizeInput("class_dept", label="Agency / Department", c("All departments", all_depts)))
                             ),
                             fluidRow(
-                              column(6, selectizeInput("class_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(6, selectizeInput("class_court", "Court", all_courts)),
                               column(6, selectizeInput("class_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             )
                           ),
@@ -375,7 +362,7 @@ fluidPage(
                               column(6, selectizeInput("time_dept", label="Agency / Department", c("All departments", all_depts)))
                             ),
                             fluidRow(
-                              column(6, selectizeInput("time_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(6, selectizeInput("time_court", "Court", all_courts)),
                               column(6, selectizeInput("time_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
                             selectizeInput("time_charge", label="Charge", c("All charges", all_charges))
@@ -391,7 +378,7 @@ fluidPage(
                                                c("All departments", all_depts)))
                               ),
                               fluidRow(
-                                column(6, selectizeInput("time_court2", "Court", c("All courts"="All courts", all_courts))),
+                                column(6, selectizeInput("time_court2", "Court", all_courts)),
                                 column(6, selectizeInput("time_disp2", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                               ),
                               selectizeInput("time_charge2", label="Charge", c("All charges", all_charges))
@@ -413,7 +400,7 @@ fluidPage(
                               column(6, selectizeInput("dem_dept", label="Agency / Department", c("All departments", all_depts)))
                             ),
                             fluidRow(
-                              column(4, selectizeInput("dem_court", "Court", c("All courts"="All courts", all_courts))),
+                              column(4, selectizeInput("dem_court", "Court", all_courts)),
                               column(4, selectizeInput("dem_charge", label="Charge", c("All charges", all_charges))),
                               column(4, selectizeInput("dem_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),

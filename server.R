@@ -20,6 +20,7 @@ disp_colors <- readRDS("data/disp_colors.rds")
 ma_towns <- read_rds("data/ma_towns.rds")
 DAs <- read_csv("data/DAs.csv")
 all_towns <- read_rds("data/all_towns.rds")
+
 load("data/violent_data.RData")
 
 # Load data
@@ -83,6 +84,22 @@ all_DAs <- c("Berkshire", "Bristol", "Cape and Islands", "Essex",
              "Hampden", "Middlesex", "Norfolk", "Northwestern",
              "Plymouth", "Suffolk", "Worcester")
 
+# Get simple list of courts & names
+all_courts <- combined94c_data[order(court), court] %>%
+  unique()
+
+court_names <- data.frame(all_courts) %>%
+  rename(court = all_courts) %>%
+  mutate(court = as.character(court),
+         court_name= case_when(
+           str_detect(court, "BMC") ~ paste0("Boston Municipal Court (", str_remove(court, "BMC "), ")"),
+           str_detect(court, 'Court$', negate=T) ~ paste(str_remove(court, " Criminal"), "Superior Court"), # I did check this was true
+           T ~ court
+         )) %>%
+  pull(court_name)
+
+names(all_courts) <- court_names
+
 # Further condense disposition categories
 combined94c_data <- combined94c_data %>% 
   mutate(disposition_cat = case_when(
@@ -105,22 +122,6 @@ combined94c_data <- combined94c_data %>%
                                       "Prescriptions", "Paraphernalia/Needles",
                                       "Minors", "Larceny", "Labelling",
                                       "Not Listed"))) 
-
-all_courts <- combined94c_data[order(court), court] %>%
-  unique()
-
-# Rename courts to be more accessible
-court_names <- data.frame(all_courts) %>%
-  rename(court = all_courts) %>%
-  mutate(court = as.character(court),
-         court_name= case_when(
-           str_detect(court, "BMC") ~ paste0("Boston Municipal Court (", str_remove(court, "BMC "), ")"),
-           str_detect(court, 'Court$', negate=T) ~ paste(str_remove(court, " Criminal"), "Superior Court"), # I did check this was true
-           T ~ court
-         )) %>%
-  pull(court_name)
-
-names(all_courts) <- court_names
 
 function(input, output, session) {
 
@@ -173,7 +174,27 @@ function(input, output, session) {
         dept_str <- paste("by the", agency)
       }
       
-      if(crt != "All courts") {
+      if (crt == "All Superior courts") { 
+        cat("court:", crt, "\n")
+        data <- data %>%
+          filter(court %in% all_courts[str_detect(court_names, "Superior")])
+        court_str <- paste("and heard by a Superior court")
+      } else if (crt == "All District courts") { 
+        cat("court:", crt, "\n")
+        data <- data %>%
+          filter(str_detect(court, "District"))
+        court_str <- paste("and heard by a District court")
+      } else if (crt == "All Boston Municipal courts") { 
+        cat("court:", crt, "\n")
+        data <- data %>%
+          filter(str_detect(court, "BMC"))
+        court_str <- paste("and heard by a Boston Municipal court")
+      } else if (crt == "All Juvenile courts") { 
+        cat("court:", crt, "\n")
+        data <- data %>%
+          filter(court %in% all_courts[str_detect(court_names, "Juv")])
+        court_str <- paste("and heard by a Juvenile court")
+      } else if(crt != "All courts") {
         cat("court:", crt, "\n")
         data <- data[court == crt]
         i_court_name = match(crt, all_courts)
