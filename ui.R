@@ -115,14 +115,6 @@ fluidPage(
           p("Explore the complete record of drug-related criminal charges filed between 2003 and 2014 and prosecuted under",
             a("MGL Chapter 94C,", href="https://malegislature.gov/laws/generallaws/parti/titlexv/chapter94c"), 
              "as documented in data obtained from the Massachusetts Trial Court."),
-       # 
-       # div(id="dev-wait",
-       #     wellPanel(
-       #       icon('exclamation-triangle'),
-       #       h4("Disclaimer"),
-       #       em("Based on discussions with MassDOT, ACLUM understands that MassDOT’s historical record of traffic stops can change due to updates in reporting requirements, corrections of records, delays by municipalities in reporting their warnings and citations, and other factors. Therefore, the record of traffic stops presented here reflects only the MassDOT database as it was on February 4, 2021.",)
-       #     )
-       # ),
        
        h3("About the Data"),
        
@@ -420,122 +412,12 @@ fluidPage(
                                            value = "2014", min="2000", max="2018"))),
                             actionButton("dem_button", "Go"))
                 ),
-                # h2(textOutput("disp_count_str"), align="center"),
-                # p(textOutput("disp_str", inline=T), align="center"),
                 withSpinner(uiOutput("dem_dashboard"), type=4, color="#b5b5b5", size=0.5)
-       )
-       
-       
-       # Stops by offense ------------------------------------------
-       # tabPanel("Stops by offense"#, 
-                # wellPanel(id="internal_well",
-                #           fluidRow(
-                #             column(4, selectizeInput("offense_town", "Town/City", c("All cities and towns", all_towns))),
-                #             column(4, selectizeInput("offense_agency", 
-                #                            label="Agency/Department", c("All agencies", all_agencies))),
-                #             column(4, div(id="custom_label_div",
-                #                 tags$b("Officer ID"),
-                #                 a(icon("info-circle"), id="officer_tooltip",
-                #                   `data-toggle`="tooltip", title=officer_tooltip_html),
-                #                 selectizeInput("offense_officer", 
-                #                                label=NULL, 
-                #                                c("Loading, please wait..." = ""))))
-                #             ),
-                #           
-                #           splitLayout(
-                #             dateInput("offense_start_date", "Start Date",
-                #                       value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #             dateInput("offense_end_date", "End Date",
-                #                       value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #           actionButton("offense_button", "Go")),#style="text-align: center;"),
-                # withSpinner(plotlyOutput("offenses"), type=4, color="#b5b5b5", size=0.5)
-       # ),
-                
-       # Agencies ------------------------------------------
-       # "Agency Lookup",
-       # tabPanel("Agency Lookup"#, 
-                # wellPanel(id="internal_well",
-                #   selectizeInput("agency_agency", 
-                #                  label="Agency/Department", 
-                #                  c(all_agencies)),
-                #   splitLayout(
-                #     dateInput("agency_start_date", "Start Date",
-                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #     dateInput("agency_end_date", "End Date",
-                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #   actionButton("agency_button", "Go")),
-                # withSpinner(uiOutput("agency_dashboard"), type=4, color="#b5b5b5", size=0.5)
-       # ),
-    
-       # TOWN LOOKUP ----------------------------------------------
-       # "Town Lookup",
-       
-       # Town overview ----------------------------------------------
-       # tabPanel("Town Lookup"#, 
-                # wellPanel(id="internal_well",
-                #           selectizeInput("townover_town", "Town/City", all_towns),
-                #           splitLayout(
-                #             dateInput("townover_start_date", "Start Date",
-                #                       value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #             dateInput("townover_end_date", "End Date",
-                #                       value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #           actionButton("townover_button", "Go")),
-                # withSpinner(uiOutput("townover_dashboard"), type=4, color="#b5b5b5", size=0.5)
-                # ),
-       
-       # Town stops by race ---------------------------------------
-       # tabPanel("Race of Stops by Town"#, 
-                # wellPanel(id="internal_well",
-                #   splitLayout(
-                #     selectizeInput("town_town", "Town/City", all_towns),
-                #     selectizeInput("town_agency", 
-                #                    label="Agency/Department",
-                #                    choices=c("All agencies", all_agencies))
-                #   ),
-                #   splitLayout(
-                #     dateInput("town_race_start_date", "Start Date",
-                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #     dateInput("town_race_end_date", "End Date",
-                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #   actionButton("town_button", "Go")
-                # ),
-                # hidden(img(src="race_legend.png", id="town_race_legend")),
-                # withSpinner(plotlyOutput("town_demog"), type=4, color="#b5b5b5", size=0.5)
-                # ),
-    
-       # "Officer ID Lookup",
-       # Officer stops by race ------------------------------------
-       # tabPanel("Race of Stops by Officer"#, 
-                # wellPanel(id="internal_well",
-                #   splitLayout(
-                #     selectizeInput("officer_agency", 
-                #                    label="Agency / Department", all_agencies),
-                #     div(id="custom_label_div",
-                #         tags$b("Officer ID"),
-                #         a(icon("info-circle"), id="officer_tooltip",
-                #           `data-toggle`="tooltip", title=officer_tooltip_html),
-                #         selectizeInput("officer_officer", 
-                #                        label=NULL, 
-                #                        choices=c("Loading, please wait..." = "")))
-                #     ),
-                #   splitLayout(
-                #     dateInput("officer_race_start_date", "Start Date",
-                #               value = "2002-01-01", min="2002-01-01", max="2021-02-04"),
-                #     dateInput("officer_race_end_date", "End Date",
-                #               value = "2021-02-04", min="2002-01-01", max="2021-02-04")),
-                #   actionButton("officer_button", "Go")
-                # ),
-                # hidden(img(src="race_legend.png", id="officer_race_legend")),
-                # withSpinner(plotlyOutput("officer_demog"), type=4, color="#b5b5b5", size=0.5)
-                # )
-                # 
-                # 
-        )
-        # )
+            )
+          )
        ),
     
     div(id="footer",
-        # hr(),
         div(align="center",
             a(href="https://www.aclum.org/", target="_blank",
               img(src="Logo_CMYK_Massachusetts_Massachusetts.png", height="50px", 
