@@ -125,18 +125,24 @@ combined94c_data <- combined94c_data %>%
 
 
 # Define modal UI explaining charge types
-modal_text <- list()
-i <- 1
+modal_text <- list(em("* - charge with mandatory minimum sentence", a("in 2016", href="https://www.aclum.org/sites/default/files/wp-content/uploads/2016/07/Bridgeman-Corrected-Villarreal-Affidavit-6-30-16-with-Exhibits.pdf#page=27", target="_blank")))
+i <- 2
 for (grp in names(charge_colors)) {
   if (grp != "Not Listed") {
     modal_text[[i]] <- h3(grp)
     i <- i + 1
     
-    charges_in_grp <- charge_cats_df %>%
+    charges_in_grp <-charge_cats_df %>%
       filter(charge_cat == grp) %>%
-      mutate(charge = str_replace(charge, "\\?", "§")) %>%
-      arrange(charge) %>%
-      pull(charge)
+      mutate(charge = str_replace(charge, "\\?", "§"),
+             charge = str_replace(charge, "C92C S32E", "c94C §32E"),
+             charge = str_replace(charge, "Sc94C", "S c94C")) %>%
+      separate(charge, c("desc", "chap"), sep="\\s(?=c94)") %>%
+      arrange(chap) %>%
+      mutate(mand_min = ifelse(mand_min, "*", ""),
+             charge2 = paste(mand_min, chap, "-", desc),
+             charge2 = str_replace(charge2, "NA - NA", "other")) %>%
+      pull(charge2) 
     
     for (charge in charges_in_grp) {
       modal_text[[i]] <- p(charge)

@@ -1,119 +1,119 @@
-charge,charge_cat,charge_subcat
-"DRUG, POSSESS CLASS D c94C ?34",Possession,Possession (Class D)
-"DRUG, POSSESS CLASS B c94C ?34",Possession,Possession (Class B)
-DRUG VIOLATION NEAR SCHOOL/PARK c94C ?32J,School Violation,School Violation
-CONSPIRACY TO VIOLATE DRUG LAW c94C ?40,Conspiracy,Conspiracy
-"DRUG, POSSESS CLASS A c94C ?34",Possession,Possession (Class A)
-"DRUG, POSSESS TO DISTRIB CLASS D c94C ?32C(a)",Distribution,Possession to Distribute (Class D)
-"DRUG, POSSESS TO DISTRIB CLASS B c94C ?32A(a)",Distribution,Possession to Distribute (Class B)
-"DRUG, POSSESS CLASS E c94C ?34",Possession,Possession (Class E)
-"DRUG, DISTRIBUTE CLASS B c94C ?32A(a)",Distribution,Distribution (Class B)
-"COCAINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"DRUG, POSSESS TO DISTRIB CLASS A c94C ?32(a)",Distribution,Distribution
-"HYPODERMIC, POSSESS c94C ?27(a)",Distribution,Possession to Distribute (Class A)
-"DRUG, DISTRIBUTE CLASS A c94C ?32(a)",Distribution,Distribution (Class A)
-"DRUG, POSSESS CLASS C c94C ?34",Possession,Possession (Class C)
-"DRUG, DISTRIBUTE CLASS D c94C ?32C(a)",Distribution,Distribution (Class D)
-"PRESCRIPTION, UTTER FALSE c94C ?33(b)",Prescriptions,Prescriptions
-"DRUG, POSSESS CLASS D, SUBSQ.OFF. c94C ?34",Possession,Possession (Class D)
-"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN c94C ?32E(c)",Trafficking,Trafficking (Class A)
-"DRUG, POSSESS CLASS B, SUBSQ.OFF. c94C ?34",Possession,Possession (Class B)
-"COCAINE, DISTRIBUTE c94C ?32A(c)",Distribution,Distribution (Class B)
-"HEROIN, BEING PRESENT WHERE KEPT c94C ?35",Possession,Possession (Class A)
-"DRUG, OBTAIN BY FRAUD c94C ?33(b)",Fraud,Fraud
-"DRUG, POSSESS TO DISTRIB CLASS B, SUBSQ. c94C ?32A(b)",Distribution,Possession to Distribute (Class B)
-"COCAINE, POSSESS TO DISTRIBUTE c94C ?32A(c)",Distribution,Possession to Distribute (Class B)
-"DRUG, DISTRIBUTE CLASS B, SUBSQ.OFF. c94C ?32A(b)",Distribution,Distribution (Class B)
-"DRUG, POSSESS TO DISTRIB CLASS C c94C ?32B(a)",Distribution,Possession to Distribute (Class C)
-"DRUG, POSSESS CLASS A, SUBSQ.OFF. c94C ?34",Possession,Possession (Class A)
-"DRUG, POSSESS TO DISTRIB CLASS E c94C ?32D(a)",Distribution,Possession to Distribute (Class E)
-"DRUG, POSSESS TO DISTRIB CLASS A, SUBSQ. c94C ?32(b)",Distribution,Possession to Distribute (Class A)
-"DRUG, DISTRIBUTE CLASS A, SUBSQ.OFF. c94C ?32(b)",Distribution,Distribution (Class A)
-"DRUG, LARCENY OF c94C ?37",Larceny,Larceny
-"COCAINE, DISTRIBUTE, SUBSQ.OFF. c94C ?32A(d)",Distribution,Distribution (Class B)
-"MARIHUANA, POSSESS c94C ?34",Possession,Possession (Class D)
-"DRUG, POSSESS TO DISTRIB CLASS D, SUBSQ. c94C ?32C(b)",Distribution,Possession to Distribute (Class D)
-"COCAINE, POSSESS TO DISTRIBUTE, SUBSQ. c94C ?32A(d)",Distribution,Possession to Distribute (Class B)
-"DRUG, DISTRIBUTE CLASS C c94C ?32B(a)",Distribution,Distribution (Class C)
-"HEROIN, POSSESS c94C ?34",Possession,Possession (Class A)
-"DRUG, DISTRIBUTE CLASS E c94C ?32D(a)",Distribution,Distribution (Class E)
-"DRUG PARAPHERNALIA, POSSESS TO DISTRIB c94C ?32I(a)",Paraphernalia/Needles,Paraphernalia/Needles
-"DRUG, DISTRIBUTE CLASS D, SUBSQ.OFF. c94C ?32C(b)",Distribution,Distribution (Class D)
-"MARIHUANA +1 OZ, POSSESS c94C  ?34",Possession,Possession (Class D)
-"COCAINE, TRAFFICKING IN, 36 GRAMS OR MORE, LESS THAN 100 GRAMS c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"COUNTERFEIT DRUG, DISTRIBUTE c94C ?32G",Fraud,Fraud
-"HYPODERMIC, POSSESS, SUBSQ.OFF. c94C ?27(a)",Paraphernalia/Needles,Paraphernalia/Needles
-"COCAINE, TRAFFICKING IN 18 GRAMS OR MORE, LESS THAN 36 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"DRUG, POSSESS CLASS C, SUBSQ.OFF. c94C ?34",Possession,Possession (Class C)
-"PRESCRIPTION, UTTER FALSE, SUBSQ.OFF. c94C ?33(c)",Prescriptions,Prescriptions
-"MARIHUANA, TRAFFICKING IN  c94C ?32E(a)",Trafficking,Trafficking (Class D)
-"COUNTERFEIT DRUG, POSSESS TO DISTRIBUTE c94C ?32G",Fraud,Fraud
-"DRUG PARAPHERNALIA, DISTRIBUTE c94C ?32I(a)",Paraphernalia/Needles,Paraphernalia/Needles
-"DRUG, POSSESS TO DISTRIB CLASS C, SUBSQ. c94C ?32B(b)",Distribution,Possession to Distribute (Class C)
-"DRUG, POSSESS TO DISTRIB CLASS E, SUBSQ. c94C ?32D(b)",Distribution,Possession to Distribute (Class E)
-"HEROIN, POSSESS, SUBSQ.OFF. c94C ?34",Possession,Possession (Class A)
-"MARIHUANA, POSSESS, SUBSQ.OFF. c94C ?34",Possession,Possession (Class D)
-"DRUG, FALSE REGIS NUMBER FOR c94C ?33(a)",Fraud,Fraud
-"METHAMPHETAMINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"DRUG, OBTAIN BY FRAUD, SUBSQ.OFF. c94C ?33(c)",Fraud,Fraud
-"DRUG, CAUSE MINOR TO DISTRIBUTE c94C ?32K",Minors,Minors
-"DRUG, DISTRIBUTE CLASS C, SUBSQ.OFF. c94C ?32B(b)",Distribution,Distribution (Class C)
-"COCAINE, TRAFFICKING IN, 200 GRAMS OR MORE c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"METHAMPHETAMINE, POSSESS TO DISTRIB c94C ?32A(c)",Distribution,Possession to Distribute (Class B)
-"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 18 GRAMS OR MORE, LESS THAN 36 GRAMS c94C ?32E(c)",Trafficking,Trafficking (Class A)
-"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 36 GRAMS OR MORE, LESS THAN 100 GRAMS c94C ?32E(c)",Trafficking,Trafficking (Class A)
-"DRUG, DISTRIBUTE CLASS E, SUBSQ.OFF. c94C ?32D(b)",Distribution,Distribution (Class E)
-"DRUG LABEL, REMOVE/ALTER c94C ?25(4)",Labelling,Labelling
-"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 200 GRAMS OR MORE c94C ?32E(c)",Trafficking,Trafficking (Class A)
-"DRUG, DISTRIBUTE TO MINOR CLASS A c94C ?32F(a)",Minors,Minors
-"COCAINE, TRAFFICKING IN, 100 GRAMS OR MORE, LESS THAN 200 GRAMS c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"DRUG, DISTRIBUTE TO MINOR CLASS B c94C ?32F(b)",Distribution,Minors
-"MARIHUANA +1 OZ, POSSESS, SUBSQ. OFF. c94C ?34",Possession,Possession (Class D)
-"METHAMPHETAMINE, DISTRIBUTE c94C ?32A(c)",Distribution,Distribution (Class B)
-"CLASS B, TRAFFICKING IN C92C S32E",Trafficking,Trafficking (Class B)
-"FALSE PRESCRIPTION, PRACT ISSUE CLASS A c94C ?19(a)",Prescriptions,Prescriptions
-"DRUG, POSSESS TO DISTR TO MINOR CLASS C c94C ?32F(c)",Minors,Minors
-"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 100 GRAMS OR MORE, LESS THAN 200 GRAMS c94C ?32E(c)",Trafficking,Trafficking (Class A)
-"PHENCYCLIDINE, POSSESS TO DISTRIB c94C ?32A(d)",Distribution,Possession to Distribute (Class B)
-"PRESCRIPTION, WRITE IMPROPER c94C ?22(a)",Prescriptions,Prescriptions
-"DRUG FUNDS, CAUSE MINOR TO POSSESS c94C ?32K",Minors,Minors
-"DRUG, DISPENSE W/O PRESCRIPTION c94C ?25(1)",Prescriptions,Prescriptions
-"HYPODERMIC, STORE IMPROP c94C ?27(b)",Paraphernalia/Needles,Paraphernalia/Needles
-"METHAMPHETAMINE, POSSESS TO DISTRIB, 2ND c94C ?32A(d)",Distribution,Possession to Distribute (Class B)
-"DRUG, DISTRIBUTE TO MINOR CLASS C c94C ?32F(c)",Distribution,Minors
-"DRUG, POSSESS TO DISTR TO MINOR CLASS B c94C ?32F(b)",Distribution,Possession to Distribute (Class B)
-"PHENCYCLIDINE, POSSESS TO DISTRIB, SUBSQ c94C ?32A(d)",Distribution,Possession to Distribute (Class B)
-"COCAINE, DISTRIBUTE TO MINOR c94C ?32F(d)",Minors,Minors
-"METHAMPHETAMINE, DISTRIBUTE, SUBSQ.OFF. c94C ?32A(d)",Distribution,Distribution (Class B)
-"HYPODERMIC, DISTRIB WITHOUT LIC c94C ?27(e)",Paraphernalia/Needles,Paraphernalia/Needles
-"HYPODERMIC SALES RECORD, FL KEEP c94C ?27(d)",Paraphernalia/Needles,Paraphernalia/Needles
-"HYPODERMIC, OBTAIN WITHOUT LIC c94C ?27(e)",Paraphernalia/Needles,Paraphernalia/Needles
-"DRUG, FALSE REGIS NUMBER FOR, SUBSQ.OFF. c94C ?33(c)",Fraud,Fraud
-"0917HYPODERMIC, POSSESS, SUBSQ.OFF. c94C ?27(a)",Paraphernalia/Needles,Paraphernalia/Needles
-"DRUG PARAPHERNALIA, SELL TO MINOR c94C ?32I(b)",Minors,Minors
-"DRUG, POSSESS TO DISTR TO MINOR CLASS A c94C ?32F(a)",Minors,Minors
-"HYPODERMIC, DISTRIB TO UNAUTH PERSON c94C ?27(b)",Paraphernalia/Needles,Paraphernalia/Needles
-"PHENMETRAZINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"COCAINE, TRAFFICKING IN 28 GRAMS OR MORE, LESS THAN 100 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"ROLLING PAPERS WARNING NOTICE, FAIL POST c94C ?32I(c)",Paraphernalia/Needles,Paraphernalia/Needles
-"DRUG INFO, REGISTRANT GIVE FALSE c94C ?26(2)",Fraud,Fraud
-"DRUG, DISTRIBUTE UNAUTHORIZED c94C ?25(2)",Fraud,Fraud
-"DRUG, PHARMACIST FAIL LABEL c94C ?21",Labelling,Labelling
-"HYPODERMIC FOR DRUGS, UNLICENSED SALE OF c94C ?27",Paraphernalia/Needles,Paraphernalia/Needles
-"PHENCYCLIDINE, DISTRIBUTE, SUBSQ.OFF. c94C ?32A(d)",Distribution,Distribution (Class B)
-NA,Not Listed,Not Listed
-"DRUG PARAPHERNALIA TO MINOR, SELL  c94C ?32I(b)",Minors,Minors
-"HYPODERMIC, OBTAIN WITHOUT LIC, SUBSQ. c94C ?27(e)",Paraphernalia/Needles,Paraphernalia/Needles
-"MARIHUANA, TRAFFICKING IN 100 POUNDS OR MORE BUT LESS THAN 2,000 POUNDS c94C ?32E(a)",Trafficking,Trafficking (Class D)
-"MARIHUANA, TRAFFICKING IN 50 POUNDS OR MORE BUT LESS THAN 100 POUNDSc94C ?32E(a)",Trafficking,Trafficking (Class D)
-"METHAMPHETAMINE, TRAFFICKING IN  36 GRAMS OR MORE, LESS THAN 100 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B)
-"PHENCYCLIDINE, DISTRIBUTE c94C ?32A(c)",Distribution,Distribution (Class B)
-"PHENMETRAZINE, TRAFFICKING IN 18 GRAMS OR MORE, LESS THAN 36 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B)
-POSSESSION OF MARIHUANA ONE OUNCE OR LESS < 18 YEARS OLD  c94C ?32L,Minors,Minors
-"PRESCRIPTION, WRITE IMPROPER, SUBSQ.OFF. c94C ?22(a)",Prescriptions,Prescriptions
-"DRUG RECORDS, FAIL KEEP c94C ?25(5)",Labelling,Labelling
-"DRUG SEAL, BREAK c94C ?25(7)",Labelling,Labelling
-"DRUG, FAIL REPORT DISPENSING c94C ?24(a)",Fraud,Fraud
-"FALSE PRESCRIPTION, PHARMACIST KNOWINGLY FILL CLASS C  c94C ?19(a)",Prescriptions,Prescriptions
-"HYPODERMIC, STORE IMPROP, SUBSQ. c94C ?27(b)",Paraphernalia/Needles,Paraphernalia/Needles
-"METHAMPHETAMINE, TRAFFICKING IN 200 GRAMS OR MORE  c94C ?32E(b)",Trafficking,Trafficking (Class B)
+charge,charge_cat,charge_subcat,mand_min
+"DRUG, POSSESS CLASS D c94C ?34",Possession,Possession (Class D),F
+"DRUG, POSSESS CLASS B c94C ?34",Possession,Possession (Class B),F
+DRUG VIOLATION NEAR SCHOOL/PARK c94C ?32J,School Violation,School Violation,T
+CONSPIRACY TO VIOLATE DRUG LAW c94C ?40,Conspiracy,Conspiracy,F
+"DRUG, POSSESS CLASS A c94C ?34",Possession,Possession (Class A),F
+"DRUG, POSSESS TO DISTRIB CLASS D c94C ?32C(a)",Distribution,Possession to Distribute (Class D),F
+"DRUG, POSSESS TO DISTRIB CLASS B c94C ?32A(a)",Distribution,Possession to Distribute (Class B),F
+"DRUG, POSSESS CLASS E c94C ?34",Possession,Possession (Class E),F
+"DRUG, DISTRIBUTE CLASS B c94C ?32A(a)",Distribution,Distribution (Class B),F
+"COCAINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"DRUG, POSSESS TO DISTRIB CLASS A c94C ?32(a)",Distribution,Distribution,F
+"HYPODERMIC, POSSESS c94C ?27(a)",Distribution,Possession to Distribute (Class A),F
+"DRUG, DISTRIBUTE CLASS A c94C ?32(a)",Distribution,Distribution (Class A),F
+"DRUG, POSSESS CLASS C c94C ?34",Possession,Possession (Class C),F
+"DRUG, DISTRIBUTE CLASS D c94C ?32C(a)",Distribution,Distribution (Class D),F
+"PRESCRIPTION, UTTER FALSE c94C ?33(b)",Prescriptions,Prescriptions,F
+"DRUG, POSSESS CLASS D, SUBSQ.OFF. c94C ?34",Possession,Possession (Class D),F
+"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN c94C ?32E(c)",Trafficking,Trafficking (Class A),T
+"DRUG, POSSESS CLASS B, SUBSQ.OFF. c94C ?34",Possession,Possession (Class B),F
+"COCAINE, DISTRIBUTE c94C ?32A(c)",Distribution,Distribution (Class B),T
+"HEROIN, BEING PRESENT WHERE KEPT c94C ?35",Possession,Possession (Class A),F
+"DRUG, OBTAIN BY FRAUD c94C ?33(b)",Fraud,Fraud,F
+"DRUG, POSSESS TO DISTRIB CLASS B, SUBSQ. c94C ?32A(b)",Distribution,Possession to Distribute (Class B),T
+"COCAINE, POSSESS TO DISTRIBUTE c94C ?32A(c)",Distribution,Possession to Distribute (Class B),T
+"DRUG, DISTRIBUTE CLASS B, SUBSQ.OFF. c94C ?32A(b)",Distribution,Distribution (Class B),T
+"DRUG, POSSESS TO DISTRIB CLASS C c94C ?32B(a)",Distribution,Possession to Distribute (Class C),F
+"DRUG, POSSESS CLASS A, SUBSQ.OFF. c94C ?34",Possession,Possession (Class A),F
+"DRUG, POSSESS TO DISTRIB CLASS E c94C ?32D(a)",Distribution,Possession to Distribute (Class E),F
+"DRUG, POSSESS TO DISTRIB CLASS A, SUBSQ. c94C ?32(b)",Distribution,Possession to Distribute (Class A),T
+"DRUG, DISTRIBUTE CLASS A, SUBSQ.OFF. c94C ?32(b)",Distribution,Distribution (Class A),T
+"DRUG, LARCENY OF c94C ?37",Larceny,Larceny,F
+"COCAINE, DISTRIBUTE, SUBSQ.OFF. c94C ?32A(d)",Distribution,Distribution (Class B),T
+"MARIHUANA, POSSESS c94C ?34",Possession,Possession (Class D),F
+"DRUG, POSSESS TO DISTRIB CLASS D, SUBSQ. c94C ?32C(b)",Distribution,Possession to Distribute (Class D),F
+"COCAINE, POSSESS TO DISTRIBUTE, SUBSQ. c94C ?32A(d)",Distribution,Possession to Distribute (Class B),T
+"DRUG, DISTRIBUTE CLASS C c94C ?32B(a)",Distribution,Distribution (Class C),F
+"HEROIN, POSSESS c94C ?34",Possession,Possession (Class A),F
+"DRUG, DISTRIBUTE CLASS E c94C ?32D(a)",Distribution,Distribution (Class E),F
+"DRUG PARAPHERNALIA, POSSESS TO DISTRIB c94C ?32I(a)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"DRUG, DISTRIBUTE CLASS D, SUBSQ.OFF. c94C ?32C(b)",Distribution,Distribution (Class D),F
+"MARIHUANA +1 OZ, POSSESS c94C  ?34",Possession,Possession (Class D),F
+"COCAINE, TRAFFICKING IN, 36 GRAMS OR MORE, LESS THAN 100 GRAMS c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"COUNTERFEIT DRUG, DISTRIBUTE c94C ?32G",Fraud,Fraud,F
+"HYPODERMIC, POSSESS, SUBSQ.OFF. c94C ?27(a)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"COCAINE, TRAFFICKING IN 18 GRAMS OR MORE, LESS THAN 36 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"DRUG, POSSESS CLASS C, SUBSQ.OFF. c94C ?34",Possession,Possession (Class C),F
+"PRESCRIPTION, UTTER FALSE, SUBSQ.OFF. c94C ?33(c)",Prescriptions,Prescriptions,F
+"MARIHUANA, TRAFFICKING IN  c94C ?32E(a)",Trafficking,Trafficking (Class D),T
+"COUNTERFEIT DRUG, POSSESS TO DISTRIBUTE c94C ?32G",Fraud,Fraud,F
+"DRUG PARAPHERNALIA, DISTRIBUTE c94C ?32I(a)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"DRUG, POSSESS TO DISTRIB CLASS C, SUBSQ. c94C ?32B(b)",Distribution,Possession to Distribute (Class C),T
+"DRUG, POSSESS TO DISTRIB CLASS E, SUBSQ. c94C ?32D(b)",Distribution,Possession to Distribute (Class E),F
+"HEROIN, POSSESS, SUBSQ.OFF. c94C ?34",Possession,Possession (Class A),F
+"MARIHUANA, POSSESS, SUBSQ.OFF. c94C ?34",Possession,Possession (Class D),F
+"DRUG, FALSE REGIS NUMBER FOR c94C ?33(a)",Fraud,Fraud,F
+"METHAMPHETAMINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"DRUG, OBTAIN BY FRAUD, SUBSQ.OFF. c94C ?33(c)",Fraud,Fraud,F
+"DRUG, CAUSE MINOR TO DISTRIBUTE c94C ?32K",Minors,Minors,F
+"DRUG, DISTRIBUTE CLASS C, SUBSQ.OFF. c94C ?32B(b)",Distribution,Distribution (Class C),T
+"COCAINE, TRAFFICKING IN, 200 GRAMS OR MORE c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"METHAMPHETAMINE, POSSESS TO DISTRIB c94C ?32A(c)",Distribution,Possession to Distribute (Class B),T
+"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 18 GRAMS OR MORE, LESS THAN 36 GRAMS c94C ?32E(c)",Trafficking,Trafficking (Class A),T
+"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 36 GRAMS OR MORE, LESS THAN 100 GRAMS c94C ?32E(c)",Trafficking,Trafficking (Class A),T
+"DRUG, DISTRIBUTE CLASS E, SUBSQ.OFF. c94C ?32D(b)",Distribution,Distribution (Class E),F
+"DRUG LABEL, REMOVE/ALTER c94C ?25(4)",Labelling,Labelling,F
+"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 200 GRAMS OR MORE c94C ?32E(c)",Trafficking,Trafficking (Class A),T
+"DRUG, DISTRIBUTE TO MINOR CLASS A c94C ?32F(a)",Minors,Minors,T
+"COCAINE, TRAFFICKING IN, 100 GRAMS OR MORE, LESS THAN 200 GRAMS c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"DRUG, DISTRIBUTE TO MINOR CLASS B c94C ?32F(b)",Minors,Minors,T
+"MARIHUANA +1 OZ, POSSESS, SUBSQ. OFF. c94C ?34",Possession,Possession (Class D),F
+"METHAMPHETAMINE, DISTRIBUTE c94C ?32A(c)",Distribution,Distribution (Class B),T
+"CLASS B, TRAFFICKING IN C92C S32E",Trafficking,Trafficking (Class B),T
+"FALSE PRESCRIPTION, PRACT ISSUE CLASS A c94C ?19(a)",Prescriptions,Prescriptions,F
+"DRUG, POSSESS TO DISTR TO MINOR CLASS C c94C ?32F(c)",Minors,Minors,T
+"HEROIN/MORPHINE/OPIUM, TRAFFICKING IN 100 GRAMS OR MORE, LESS THAN 200 GRAMS c94C ?32E(c)",Trafficking,Trafficking (Class A),T
+"PHENCYCLIDINE, POSSESS TO DISTRIB c94C ?32A(d)",Distribution,Possession to Distribute (Class B),T
+"PRESCRIPTION, WRITE IMPROPER c94C ?22(a)",Prescriptions,Prescriptions,F
+"DRUG FUNDS, CAUSE MINOR TO POSSESS c94C ?32K",Minors,Minors,F
+"DRUG, DISPENSE W/O PRESCRIPTION c94C ?25(1)",Prescriptions,Prescriptions,F
+"HYPODERMIC, STORE IMPROP c94C ?27(b)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"METHAMPHETAMINE, POSSESS TO DISTRIB, 2ND c94C ?32A(d)",Distribution,Possession to Distribute (Class B),T
+"DRUG, DISTRIBUTE TO MINOR CLASS C c94C ?32F(c)",Minors,Minors,T
+"DRUG, POSSESS TO DISTR TO MINOR CLASS B c94C ?32F(b)",Minors,Minors,T
+"PHENCYCLIDINE, POSSESS TO DISTRIB, SUBSQ c94C ?32A(d)",Distribution,Possession to Distribute (Class B),T
+"COCAINE, DISTRIBUTE TO MINOR c94C ?32F(d)",Minors,Minors,T
+"METHAMPHETAMINE, DISTRIBUTE, SUBSQ.OFF. c94C ?32A(d)",Distribution,Distribution (Class B),T
+"HYPODERMIC, DISTRIB WITHOUT LIC c94C ?27(e)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"HYPODERMIC SALES RECORD, FL KEEP c94C ?27(d)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"HYPODERMIC, OBTAIN WITHOUT LIC c94C ?27(e)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"DRUG, FALSE REGIS NUMBER FOR, SUBSQ.OFF. c94C ?33(c)",Fraud,Fraud,F
+"0917HYPODERMIC, POSSESS, SUBSQ.OFF. c94C ?27(a)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"DRUG PARAPHERNALIA, SELL TO MINOR c94C ?32I(b)",Minors,Minors,F
+"DRUG, POSSESS TO DISTR TO MINOR CLASS A c94C ?32F(a)",Minors,Minors,T
+"HYPODERMIC, DISTRIB TO UNAUTH PERSON c94C ?27(b)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"PHENMETRAZINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"COCAINE, TRAFFICKING IN 28 GRAMS OR MORE, LESS THAN 100 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"ROLLING PAPERS WARNING NOTICE, FAIL POST c94C ?32I(c)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"DRUG INFO, REGISTRANT GIVE FALSE c94C ?26(2)",Fraud,Fraud,F
+"DRUG, DISTRIBUTE UNAUTHORIZED c94C ?25(2)",Fraud,Fraud,F
+"DRUG, PHARMACIST FAIL LABEL c94C ?21",Labelling,Labelling,F
+"HYPODERMIC FOR DRUGS, UNLICENSED SALE OF c94C ?27",Paraphernalia/Needles,Paraphernalia/Needles,F
+"PHENCYCLIDINE, DISTRIBUTE, SUBSQ.OFF. c94C ?32A(d)",Distribution,Distribution (Class B),T
+NA,Not Listed,Not Listed,F
+"DRUG PARAPHERNALIA TO MINOR, SELL  c94C ?32I(b)",Minors,Minors,F
+"HYPODERMIC, OBTAIN WITHOUT LIC, SUBSQ. c94C ?27(e)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"MARIHUANA, TRAFFICKING IN 100 POUNDS OR MORE BUT LESS THAN 2,000 POUNDS c94C ?32E(a)",Trafficking,Trafficking (Class D),T
+"MARIHUANA, TRAFFICKING IN 50 POUNDS OR MORE BUT LESS THAN 100 POUNDSc94C ?32E(a)",Trafficking,Trafficking (Class D),T
+"METHAMPHETAMINE, TRAFFICKING IN  36 GRAMS OR MORE, LESS THAN 100 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+"PHENCYCLIDINE, DISTRIBUTE c94C ?32A(c)",Distribution,Distribution (Class B),T
+"PHENMETRAZINE, TRAFFICKING IN 18 GRAMS OR MORE, LESS THAN 36 GRAMS  c94C ?32E(b)",Trafficking,Trafficking (Class B),T
+POSSESSION OF MARIHUANA ONE OUNCE OR LESS < 18 YEARS OLD  c94C ?32L,Minors,Minors,F
+"PRESCRIPTION, WRITE IMPROPER, SUBSQ.OFF. c94C ?22(a)",Prescriptions,Prescriptions,F
+"DRUG RECORDS, FAIL KEEP c94C ?25(5)",Labelling,Labelling,F
+"DRUG SEAL, BREAK c94C ?25(7)",Labelling,Labelling,F
+"DRUG, FAIL REPORT DISPENSING c94C ?24(a)",Fraud,Fraud,F
+"FALSE PRESCRIPTION, PHARMACIST KNOWINGLY FILL CLASS C  c94C ?19(a)",Prescriptions,Prescriptions,F
+"HYPODERMIC, STORE IMPROP, SUBSQ. c94C ?27(b)",Paraphernalia/Needles,Paraphernalia/Needles,F
+"METHAMPHETAMINE, TRAFFICKING IN 200 GRAMS OR MORE  c94C ?32E(b)",Trafficking,Trafficking (Class B),T
