@@ -123,6 +123,28 @@ combined94c_data <- combined94c_data %>%
                                       "Minors", "Larceny", "Labelling",
                                       "Not Listed"))) 
 
+
+# Define modal UI explaining charge types
+modal_text <- list()
+i <- 1
+for (grp in names(charge_colors)) {
+  if (grp != "Not Listed") {
+    modal_text[[i]] <- h3(grp)
+    i <- i + 1
+    
+    charges_in_grp <- charge_cats_df %>%
+      filter(charge_cat == grp) %>%
+      mutate(charge = str_replace(charge, "\\?", "§")) %>%
+      arrange(charge) %>%
+      pull(charge)
+    
+    for (charge in charges_in_grp) {
+      modal_text[[i]] <- p(charge)
+      i <- i + 1
+    }
+  }
+}
+
 function(input, output, session) {
 
     # Helper functions - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -1037,6 +1059,11 @@ function(input, output, session) {
       
     })
     
+    # Connect modal to charge info link
+    observeEvent(input$charge_modal_disp, {
+      showModal(modalDialog(renderUI(modal_text), easyClose = TRUE, footer = NULL))
+    })
+    
     # Calculate all the values for disposition plot
     observeEvent(input$disp_button, {
 
@@ -1148,6 +1175,11 @@ function(input, output, session) {
                          "charge_end_year", value=end_value,
                          max=yr_max, min=yr_min)
       
+    })
+    
+    # Connect modal to charge info link
+    observeEvent(input$charge_modal_charge, {
+      showModal(modalDialog(renderUI(modal_text), easyClose = TRUE, footer = NULL))
     })
     
     # Calculate all the values for charge type plot
@@ -1321,6 +1353,14 @@ function(input, output, session) {
     
     time_values <- reactiveValues(agency = NULL)
     
+    # Connect modal to charge info link
+    observeEvent(input$charge_modal_time, {
+      showModal(modalDialog(renderUI(modal_text), easyClose = TRUE, footer = NULL))
+    })
+    observeEvent(input$charge_modal_time2, {
+      showModal(modalDialog(renderUI(modal_text), easyClose = TRUE, footer = NULL))
+    })
+    
     observeEvent(input$time_button, {
       
       time_values$town <- input$time_city
@@ -1486,6 +1526,11 @@ function(input, output, session) {
                          "dem_end_year", value=end_value,
                          max=yr_max, min=yr_min)
       
+    })
+    
+    # Connect modal to charge info link
+    observeEvent(input$charge_modal_dem, {
+      showModal(modalDialog(renderUI(modal_text), easyClose = TRUE, footer = NULL))
     })
     
     # Calculate all the values for demographics plot

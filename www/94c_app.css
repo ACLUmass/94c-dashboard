@@ -534,3 +534,17 @@ div[data-value="Charge Type"] .shiny-spinner-output-container,
   height: 450px;
 }
 
+.well p>.action-button, .well em>.action-button {
+  display: inline !important;
+  background: inherit !important;
+  color: #337ab7 !important;
+}
+
+.form-group label {
+  height: 20px;
+}
+
+.modal-body div {
+  text-align: left;
+  margin-left: 3rem;
+}

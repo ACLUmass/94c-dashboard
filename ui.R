@@ -280,7 +280,9 @@ fluidPage(
                     ),
                     fluidRow(
                       column(6, selectizeInput("disp_court", "Court", all_courts)),
-                      column(6, selectizeInput("disp_charge", label="Charge", c("All charges", all_charges)))
+                      column(6, selectizeInput("disp_charge", 
+                                               label=p("Charge", actionLink("charge_modal_disp", label = NULL, icon=icon("info-circle"))), 
+                                               c("All charges", all_charges)))
                     ),
                   fluidRow(
                       column(4, selectizeInput("disp_yr_type", label=HTML(paste0('Year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), 
@@ -299,7 +301,7 @@ fluidPage(
        # Charge type ------------------------------------------
        tabPanel("Charge Type", 
                 wellPanel(id="internal_well",
-                          em("Explore the types of the 94C charges in Massachusetts. Filter the charges with the following criteria:"),
+                          em("Explore the types of the 94C charges", actionLink("charge_modal_charge", label = NULL, icon=icon("info-circle")), " in Massachusetts. Filter the charges with the following criteria:"),
                           fluidRow(
                             fluidRow(
                               column(6, selectizeInput("charge_city", "Town/City", c("All cities and towns", all_towns))),
@@ -365,7 +367,9 @@ fluidPage(
                               column(6, selectizeInput("time_court", "Court", all_courts)),
                               column(6, selectizeInput("time_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
-                            selectizeInput("time_charge", label="Charge", c("All charges", all_charges))
+                            selectizeInput("time_charge", 
+                                           label=p("Charge", actionLink("charge_modal_time", label = NULL, icon=icon("info-circle"))), 
+                                           c("All charges", all_charges))
                           ),
                           checkboxInput("compare_time", label="Select a second set of criteria to compare?", value=F),
                           conditionalPanel(
@@ -381,7 +385,9 @@ fluidPage(
                                 column(6, selectizeInput("time_court2", "Court", all_courts)),
                                 column(6, selectizeInput("time_disp2", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                               ),
-                              selectizeInput("time_charge2", label="Charge", c("All charges", all_charges))
+                              selectizeInput("time_charge2", 
+                                             label=p("Charge", actionLink("charge_modal_time2", label = NULL, icon=icon("info-circle"))), 
+                                             c("All charges", all_charges))
                             )),
                           actionButton("time_button", "Go")),
                 radioButtons("year_type", HTML(paste0('Plot by year of... <a id="yr_tooltip" data-toggle="tooltip" title="" data-original-title="', yr_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), choices=c("Arrest", "Disposition", "Filing", "Offense"), 
@@ -401,7 +407,9 @@ fluidPage(
                             ),
                             fluidRow(
                               column(4, selectizeInput("dem_court", "Court", all_courts)),
-                              column(4, selectizeInput("dem_charge", label="Charge", c("All charges", all_charges))),
+                              column(4, selectizeInput("dem_charge", 
+                                                       label=p("Charge", actionLink("charge_modal_dem", label = NULL, icon=icon("info-circle"))), 
+                                                       c("All charges", all_charges))),
                               column(4, selectizeInput("dem_disp", label=HTML(paste0('Disposition <a id="disp_tooltip" data-toggle="tooltip" title="" data-original-title="', disp_tooltip_html, '"><i class="fa fa-info-circle" role="presentation" aria-label="info-circle icon"></i></a>')), c("All dispositions", all_disps)))
                             ),
                             fluidRow(
