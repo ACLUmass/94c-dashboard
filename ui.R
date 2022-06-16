@@ -14,9 +14,15 @@ disp_cats <- read_csv("data/94c_dispositions.csv")
 
 all_towns <- read_rds("data/all_towns.rds")
 all_depts <- read_rds("data/all_depts.rds")
-all_charges <- charge_cats$charge_cat
 all_disps <- readRDS("data/disp_colors.rds") %>% names()
 all_courts <- read_rds("data/all_courts.rds")
+
+all_charges <- c("Possession", "Possession with Intent to Distribute",
+                 "Distribution", "School Violation",
+                 "Conspiracy", "Trafficking", "Fraud",
+                 "Prescriptions", "Paraphernalia/Needles",
+                 "Minors", "Larceny", "Labelling",
+                 "Not Listed")
 
 # Define list of counties
 all_DAs <- c("Berkshire", "Bristol", "Cape and Islands", "Essex", 
