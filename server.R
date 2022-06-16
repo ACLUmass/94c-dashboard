@@ -112,7 +112,8 @@ combined94c_data <- combined94c_data %>%
 # Further condense charge categories
 combined94c_data <- combined94c_data %>%
   mutate(charge_cat = factor(charge_cat, 
-                             levels=c("Possession", "Distribution", "School Violation",
+                             levels=c("Possession", "Possession with Intent to Distribute",
+                                      "Distribution", "School Violation",
                                       "Conspiracy", "Trafficking", "Fraud",
                                       "Prescriptions", "Paraphernalia/Needles",
                                       "Minors", "Larceny", "Labelling",
