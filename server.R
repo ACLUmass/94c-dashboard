@@ -48,6 +48,11 @@ combined94c_data <- combined94c_data %>%
     T ~ paste(department, "PD")
   ),
   jurisdiction = case_when(
+    jurisdiction == "(DO NOT USE) Middleton" ~ "Middleton",
+    is.na(jurisdiction) ~ "Not Listed",
+    T ~ jurisdiction
+  ),
+  jurisdiction_map = case_when(
     jurisdiction == "North Attleboro" ~ "N Attleborough",
     str_starts(jurisdiction, "East ") ~ str_replace(jurisdiction, "East ", "E "),
     str_starts(jurisdiction, "West ") ~ str_replace(jurisdiction, "West ", "W "),
@@ -57,8 +62,6 @@ combined94c_data <- combined94c_data %>%
     str_starts(jurisdiction, "Great ") ~ str_replace(jurisdiction, "Great ", "Gt "),
     jurisdiction == "Lunenberg" ~ "Lunenburg",
     jurisdiction == "Manchester" ~ "Manchester-By-The-Sea",
-    jurisdiction == "(DO NOT USE) Middleton" ~ "Middleton",
-    is.na(jurisdiction) ~ "Not Listed",
     T ~ jurisdiction
   ))
 
@@ -720,20 +723,20 @@ function(input, output, session) {
       data <- results[[1]]
       # label <- results[[2]]
 
-        charges_sf <- data[, .N, jurisdiction] %>%
-            merge(ma_towns, by.y = "town", by.x = "jurisdiction", all=T) %>%
+        charges_sf <- data[, .N, jurisdiction_map] %>%
+            merge(ma_towns, by.y = "town", by.x = "jurisdiction_map", all=T) %>%
             filter(!is.na(pop)) %>%
             mutate(N= replace_na(N, 0)) %>% # Fill in 0s for towns with no stops
-            select(-TOWN, town=jurisdiction) %>%
+            select(-TOWN, town=jurisdiction_map) %>%
             st_as_sf() %>%
             st_transform('+proj=longlat +datum=WGS84')
         
-        charge_types_sf <- data[, .N, .(jurisdiction, charge_cat)] %>%
+        charge_types_sf <- data[, .N, .(jurisdiction_map, charge_cat)] %>%
           # combined94c_data[, .N, .(jurisdiction, charge_cat)] %>%
-          merge(ma_towns, by.y = "town", by.x = "jurisdiction", all=T) %>%
+          merge(ma_towns, by.y = "town", by.x = "jurisdiction_map", all=T) %>%
           filter(!is.na(pop)) %>%
           mutate(N= replace_na(N, 0)) %>% # Fill in 0s for towns with no stops
-          select(-TOWN, town=jurisdiction) %>%
+          select(-TOWN, town=jurisdiction_map) %>%
           st_as_sf() %>%
           st_transform('+proj=longlat +datum=WGS84') %>%
           group_by(town) %>%
