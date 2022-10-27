@@ -10,7 +10,7 @@ CONSPIRACY TO VIOLATE DRUG LAW c94C ?40,Conspiracy,Conspiracy,F
 "DRUG, DISTRIBUTE CLASS B c94C ?32A(a)",Distribution,Distribution (Class B),F
 "COCAINE, TRAFFICKING IN c94C ?32E(b)",Trafficking,Trafficking (Class B),T
 "DRUG, POSSESS TO DISTRIB CLASS A c94C ?32(a)",Possession with Intent to Distribute,Possession to Distribute (Class A),F
-"HYPODERMIC, POSSESS c94C ?27(a)",Possession to Distribute,Possession to Distribute (Class A),F
+"HYPODERMIC, POSSESS c94C ?27(a)",Paraphernalia/Needles,Possession to Distribute (Class A),F
 "DRUG, DISTRIBUTE CLASS A c94C ?32(a)",Distribution,Distribution (Class A),F
 "DRUG, POSSESS CLASS C c94C ?34",Possession,Possession (Class C),F
 "DRUG, DISTRIBUTE CLASS D c94C ?32C(a)",Distribution,Distribution (Class D),F
