@@ -140,9 +140,16 @@ fluidPage(
        
                 br(),br(),
                 h4("What's included?"),
-                "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset includes information regarding the criminal statute under Chapter 94C applicable to each charge; the years of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
-                
-                br(),br(),
+                "All drug charges filed by Massachustts prosecutors as documented by the Trial Court between 2003 and 2014. The dataset was provided by the Court on May 3, 2019 and includes information regarding the criminal statute under Chapter 94C applicable to each charge; the years of offense, arrest, case filing, and case disposition (i.e. outcome); the  location, jurisdiction, arresting department, and presiding court for each case; the age and gender of the individuals charged; and the disposition of each charge.",
+       
+               div(id="dev-wait",
+                   wellPanel(
+                     icon('exclamation-triangle'),
+                     h4("Disclaimer:"),
+                     em("These data are current as of May 3, 2019, and do not reflect any changes or charges that occurred after that date.",)
+                   )
+               ),
+       
                 h4("What's not included?"),
                 "As required and verified by the Court, the data available here have been scrubbed of any personally identifiable information regarding the individuals involved in the criminal cases.",
                 

@@ -230,7 +230,7 @@ h4 {
 }
 
 #dev-wait em{
-  display: block;
+  display: inline;
   margin-top: 0.5rem;
   font-size: 1.2rem;
 }
@@ -239,6 +239,8 @@ h4 {
   border-radius: 0px;
   border: none;
   margin-top: 2rem;
+  margin-left: 4rem;
+  margin-right: 4rem;
 }
 
 #dev-wait i {
